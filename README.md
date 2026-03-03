@@ -11,6 +11,10 @@
 
 Lokale Webanwendung zur Verwaltung von Immobiliendaten. Importiere Objekte per CSV, durchsuche den Bestand mit Volltextsuche und pflege alle Daten per CRUD-Oberfläche — alles läuft lokal, ohne Cloud-Abhängigkeiten.
 
+<p align="center">
+  <img src="docs/assets/immoshark.png" alt="ImmoShark Dashboard" width="720" />
+</p>
+
 ---
 
 ## Inhaltsverzeichnis
@@ -30,6 +34,7 @@ Lokale Webanwendung zur Verwaltung von Immobiliendaten. Importiere Objekte per C
   - [ER-Diagramm](#er-diagramm)
 - [API-Endpunkte](#api-endpunkte)
 - [Projektstruktur](#projektstruktur)
+- [Dokumentation](#dokumentation)
 - [Lizenz](#lizenz)
 
 ---
@@ -247,7 +252,7 @@ Virtueller FTS5-Index über 13 Text-Spalten der `immobilien`-Tabelle. Wird autom
 
 ```text
 ┌──────────────────────┐        ┌──────────────────────┐
-│     immobilien       │        │  immobilien_bilder    │
+│     immobilien       │        │  immobilien_bilder   │
 ├──────────────────────┤        ├──────────────────────┤
 │ id             PK    │──1:N──▶│ id             PK    │
 │ strasse              │        │ immobilie_id   FK    │
@@ -375,6 +380,14 @@ immoshark/
 └── data/
     └── beispiel-immobilien.csv   Beispiel-CSV mit deutschen Formaten
 ```
+
+---
+
+## Dokumentation
+
+| Dokument | Beschreibung |
+|----------|-------------|
+| [Benutzeranleitung](docs/enduser/anleitung.md) | Anleitung für Endanwender mit Screenshots: Dashboard, Immobilien-Liste, Detailansicht, Formular und CSV-Import |
 
 ---
 
