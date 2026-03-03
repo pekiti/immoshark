@@ -48,6 +48,7 @@ export interface Immobilie {
   kontakt_telefon: string | null;
   kontakt_email: string | null;
   expose_nummer: string | null;
+  notizen: string | null;
   status: ImmobilienStatus;
   erstellt_am: string;
   aktualisiert_am: string;
@@ -81,6 +82,7 @@ export interface ImmobilieCreateDTO {
   kontakt_telefon?: string | null;
   kontakt_email?: string | null;
   expose_nummer?: string | null;
+  notizen?: string | null;
   status?: ImmobilienStatus;
 }
 
@@ -106,6 +108,22 @@ export interface ApiError {
   };
 }
 
+export type SortColumn =
+  | "strasse"
+  | "typ"
+  | "ort"
+  | "preis"
+  | "wohnflaeche"
+  | "zimmeranzahl"
+  | "status"
+  | "baujahr"
+  | "grundstuecksflaeche"
+  | "kontakt_name"
+  | "erstellt_am"
+  | "aktualisiert_am";
+
+export type SortOrder = "asc" | "desc";
+
 export interface ImmobilienFilter {
   suche?: string;
   typ?: ImmobilienTyp;
@@ -117,6 +135,9 @@ export interface ImmobilienFilter {
   flaeche_max?: number;
   zimmer_min?: number;
   zimmer_max?: number;
+  sort_by?: SortColumn;
+  sort_order?: SortOrder;
+  gruppe?: "kontakt";
   seite?: number;
   limit?: number;
 }

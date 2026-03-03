@@ -6,24 +6,37 @@ import type {
   ImmobilienFilter,
   ImmobilieBild,
   DashboardStats,
+  SortColumn,
 } from "@immoshark/shared";
+
+// Whitelist of sortable columns (prevents SQL injection)
+const SORTABLE_COLUMNS = new Set<SortColumn>([
+  "strasse", "typ", "ort", "preis", "wohnflaeche", "zimmeranzahl",
+  "status", "baujahr", "grundstuecksflaeche", "kontakt_name",
+  "erstellt_am", "aktualisiert_am",
+]);
 
 export function listImmobilien(filter: ImmobilienFilter) {
   const db = getDb();
   const conditions: string[] = [];
   const params: Record<string, unknown> = {};
 
-  // FTS5 full-text search
+  // FTS5 full-text search across all indexed fields
   if (filter.suche) {
+    const terms = filter.suche.split(/\s+/).filter(Boolean);
+    // FTS for text fields + LIKE fallback for numeric fields (preis, baujahr etc.)
+    const ftsMatch = terms.map((t) => `"${t}"*`).join(" ");
+    const likePattern = `%${filter.suche}%`;
     conditions.push(
-      "i.id IN (SELECT rowid FROM immobilien_fts WHERE immobilien_fts MATCH $suche)"
+      `(i.id IN (SELECT rowid FROM immobilien_fts WHERE immobilien_fts MATCH $suche)` +
+      ` OR CAST(i.preis AS TEXT) LIKE $suche_like` +
+      ` OR CAST(i.baujahr AS TEXT) LIKE $suche_like` +
+      ` OR CAST(i.wohnflaeche AS TEXT) LIKE $suche_like` +
+      ` OR CAST(i.zimmeranzahl AS TEXT) LIKE $suche_like` +
+      ` OR CAST(i.grundstuecksflaeche AS TEXT) LIKE $suche_like)`
     );
-    // Add * for prefix matching
-    params.$suche = filter.suche
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((t) => `"${t}"*`)
-      .join(" ");
+    params.$suche = ftsMatch;
+    params.$suche_like = likePattern;
   }
 
   if (filter.typ) {
@@ -67,13 +80,28 @@ export function listImmobilien(filter: ImmobilienFilter) {
   const limit = filter.limit ?? 20;
   const offset = ((filter.seite ?? 1) - 1) * limit;
 
+  // Sorting — validated column + direction
+  let orderBy: string;
+  if (filter.gruppe === "kontakt") {
+    // Group by contact: primary sort by kontakt_name, secondary by user's sort or default
+    const secondary = filter.sort_by && SORTABLE_COLUMNS.has(filter.sort_by)
+      ? `i.${filter.sort_by} ${filter.sort_order === "desc" ? "DESC" : "ASC"}`
+      : "i.aktualisiert_am DESC";
+    orderBy = `ORDER BY i.kontakt_name ASC NULLS LAST, ${secondary}`;
+  } else if (filter.sort_by && SORTABLE_COLUMNS.has(filter.sort_by)) {
+    const dir = filter.sort_order === "desc" ? "DESC" : "ASC";
+    orderBy = `ORDER BY i.${filter.sort_by} ${dir} NULLS LAST`;
+  } else {
+    orderBy = "ORDER BY i.aktualisiert_am DESC";
+  }
+
   const countRow = db
     .query(`SELECT COUNT(*) as count FROM immobilien i ${where}`)
     .get(params) as { count: number };
 
   const rows = db
     .query(
-      `SELECT i.* FROM immobilien i ${where} ORDER BY i.aktualisiert_am DESC LIMIT $limit OFFSET $offset`
+      `SELECT i.* FROM immobilien i ${where} ${orderBy} LIMIT $limit OFFSET $offset`
     )
     .all({ ...params, $limit: limit, $offset: offset }) as Immobilie[];
 

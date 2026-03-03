@@ -73,6 +73,13 @@ export function ImmobilieDetail() {
           <p className="mb-6 text-gray-600">{immo.beschreibung}</p>
         )}
 
+        {immo.notizen && (
+          <div className="mb-6 rounded-lg bg-amber-50 border border-amber-200 p-4">
+            <p className="text-xs font-medium uppercase tracking-wider text-amber-600 mb-1">Notizen</p>
+            <p className="text-sm text-amber-900 whitespace-pre-line">{immo.notizen}</p>
+          </div>
+        )}
+
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {details.map((d) => (
             <div key={d.label}>

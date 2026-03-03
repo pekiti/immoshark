@@ -66,6 +66,7 @@ export const immobilieCreateSchema = z.object({
   kontakt_telefon: z.string().nullable().optional(),
   kontakt_email: z.string().email("Ungültige E-Mail").nullable().optional(),
   expose_nummer: z.string().nullable().optional(),
+  notizen: z.string().max(500, "Notizen dürfen maximal 500 Zeichen haben").nullable().optional(),
   status: immobilienStatusSchema.optional().default("verfuegbar"),
 });
 
@@ -82,6 +83,13 @@ export const immobilienFilterSchema = z.object({
   flaeche_max: z.coerce.number().optional(),
   zimmer_min: z.coerce.number().optional(),
   zimmer_max: z.coerce.number().optional(),
+  sort_by: z.enum([
+    "strasse", "typ", "ort", "preis", "wohnflaeche", "zimmeranzahl",
+    "status", "baujahr", "grundstuecksflaeche", "kontakt_name",
+    "erstellt_am", "aktualisiert_am",
+  ]).optional(),
+  sort_order: z.enum(["asc", "desc"]).optional().default("asc"),
+  gruppe: z.enum(["kontakt"]).optional(),
   seite: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(100).optional().default(20),
 });
@@ -108,6 +116,7 @@ export const csvColumnMappingSchema = z.record(
       "kontakt_telefon",
       "kontakt_email",
       "expose_nummer",
+      "notizen",
       "status",
     ])
     .nullable()

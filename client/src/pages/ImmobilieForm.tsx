@@ -151,6 +151,23 @@ export function ImmobilieForm() {
         </fieldset>
 
         <fieldset className="space-y-4">
+          <legend className="text-base font-semibold text-gray-900">Notizen</legend>
+          <div>
+            <textarea
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-shark focus:outline-none focus:ring-1 focus:ring-shark"
+              rows={3}
+              maxLength={500}
+              placeholder="Interne Notizen zum Objekt (max. 500 Zeichen)..."
+              value={form.notizen ?? ""}
+              onChange={(e) => set("notizen", e.target.value || null)}
+            />
+            <p className="mt-1 text-xs text-gray-400 text-right">
+              {(form.notizen ?? "").length}/500
+            </p>
+          </div>
+        </fieldset>
+
+        <fieldset className="space-y-4">
           <legend className="text-base font-semibold text-gray-900">Kontakt</legend>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Input label="Name" value={form.kontakt_name ?? ""} onChange={(e) => set("kontakt_name", e.target.value || null)} />

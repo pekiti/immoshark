@@ -25,6 +25,7 @@ const FIELD_OPTIONS: { value: string; label: string }[] = [
   { value: "kontakt_telefon", label: "Kontakt Telefon" },
   { value: "kontakt_email", label: "Kontakt E-Mail" },
   { value: "expose_nummer", label: "Exposé-Nummer" },
+  { value: "notizen", label: "Notizen" },
   { value: "status", label: "Status" },
 ];
 
@@ -50,6 +51,7 @@ function autoMap(headers: string[]): CsvColumnMapping {
     telefon: "kontakt_telefon", phone: "kontakt_telefon",
     email: "kontakt_email", "e-mail": "kontakt_email",
     "exposé-nr": "expose_nummer", expose: "expose_nummer", "exposé": "expose_nummer",
+    notizen: "notizen", anmerkungen: "notizen", bemerkungen: "notizen",
     status: "status",
   };
 

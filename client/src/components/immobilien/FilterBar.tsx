@@ -12,11 +12,13 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
   const update = (partial: Partial<ImmobilienFilter>) =>
     onChange({ ...filter, ...partial, seite: 1 });
 
+  const isGrouped = filter.gruppe === "kontakt";
+
   return (
     <div className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Input
-          placeholder="Suche..."
+          placeholder="Suche (alle Felder)..."
           value={filter.suche || ""}
           onChange={(e) => update({ suche: e.target.value })}
         />
@@ -87,7 +89,21 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
           onChange={(e) => update({ zimmer_max: e.target.value ? Number(e.target.value) : undefined })}
         />
       </div>
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => update({ gruppe: isGrouped ? undefined : "kontakt" })}
+          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+            isGrouped
+              ? "bg-shark text-white"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0" />
+          </svg>
+          Nach Kontakt gruppieren
+        </button>
         <Button
           variant="ghost"
           size="sm"

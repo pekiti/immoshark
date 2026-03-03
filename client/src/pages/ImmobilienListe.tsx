@@ -1,5 +1,5 @@
 import { Link, useSearchParams } from "react-router-dom";
-import type { ImmobilienFilter } from "@immoshark/shared";
+import type { ImmobilienFilter, SortColumn } from "@immoshark/shared";
 import { useImmobilien } from "../hooks/useImmobilien";
 import { FilterBar } from "../components/immobilien/FilterBar";
 import { ImmobilienTable } from "../components/immobilien/ImmobilienTable";
@@ -39,6 +39,19 @@ export function ImmobilienListe() {
     setSearchParams(params, { replace: true });
   }, [filter, setSearchParams]);
 
+  function handleSort(column: SortColumn) {
+    if (filter.sort_by === column) {
+      // Toggle direction, or clear if already descending
+      if (filter.sort_order === "desc") {
+        setFilter({ ...filter, sort_by: undefined, sort_order: undefined, seite: 1 });
+      } else {
+        setFilter({ ...filter, sort_order: "desc", seite: 1 });
+      }
+    } else {
+      setFilter({ ...filter, sort_by: column, sort_order: "asc", seite: 1 });
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -58,7 +71,12 @@ export function ImmobilienListe() {
         <div className="py-12 text-center text-gray-500">Laden...</div>
       ) : (
         <>
-          <ImmobilienTable data={data} />
+          <ImmobilienTable
+            data={data}
+            sort={{ sort_by: filter.sort_by, sort_order: filter.sort_order }}
+            onSort={handleSort}
+            grouped={filter.gruppe === "kontakt"}
+          />
           <Pagination
             seite={meta.seite}
             limit={meta.limit}
