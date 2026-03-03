@@ -1,0 +1,12 @@
+{
+  "name": "immoshark",
+  "private": true,
+  "workspaces": ["shared", "server", "client"],
+  "scripts": {
+    "dev": "bun run --cwd server dev & bun run --cwd client dev & wait",
+    "dev:server": "bun run --cwd server dev",
+    "dev:client": "bun run --cwd client dev",
+    "build": "bun run --cwd client build",
+    "seed": "bun run --cwd server seed"
+  }
+}

@@ -1,0 +1,5 @@
+Straße;Hausnr;PLZ;Ort;Preis;Wohnfläche;Grundstücksfläche;Zimmer;Typ;Baujahr;Beschreibung;Provision;Exposé-Nr;Status
+Hauptstraße;22;80331;München;350.000,00;72;0;2,5;wohnung;2018;Helle 2,5-Zimmer-Wohnung mit EBK;3,57% inkl. MwSt.;CSV-001;verfuegbar
+Parkstraße;8;22085;Hamburg;520.000,00;120;350;4;haus;2005;Reihenhaus mit Garten und Carport;Provisionsfrei;CSV-002;verfuegbar
+Ringstraße;45;10115;Berlin;280.000,00;55;0;2;wohnung;1995;Sanierter Altbau in Mitte;3,57% inkl. MwSt.;CSV-003;reserviert
+Feldweg;12;50933;Köln;150.000,00;0;480;0;grundstueck;0;Bauland in guter Lage;Provisionsfrei;CSV-004;verfuegbar
