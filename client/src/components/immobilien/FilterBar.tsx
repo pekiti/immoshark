@@ -146,7 +146,29 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
         />
       </div>
 
-      {/* Row 4: Actions */}
+      {/* Row 4: Hinzugefügt am — Date range */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div>
+          <label className="mb-1 block text-xs font-medium text-gray-500">Hinzugefügt von</label>
+          <input
+            type="date"
+            value={draft.erstellt_von || ""}
+            onChange={(e) => set({ erstellt_von: e.target.value || undefined })}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-shark focus:outline-none focus:ring-1 focus:ring-shark"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-gray-500">Hinzugefügt bis</label>
+          <input
+            type="date"
+            value={draft.erstellt_bis || ""}
+            onChange={(e) => set({ erstellt_bis: e.target.value || undefined })}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-shark focus:outline-none focus:ring-1 focus:ring-shark"
+          />
+        </div>
+      </div>
+
+      {/* Row 5: Actions */}
       <div className="flex items-center justify-between border-t border-gray-100 pt-3">
         <button
           type="button"

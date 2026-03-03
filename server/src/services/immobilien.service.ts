@@ -75,6 +75,14 @@ export function listImmobilien(filter: ImmobilienFilter) {
     conditions.push("i.zimmeranzahl <= $zimmer_max");
     params.$zimmer_max = filter.zimmer_max;
   }
+  if (filter.erstellt_von) {
+    conditions.push("i.erstellt_am >= $erstellt_von");
+    params.$erstellt_von = filter.erstellt_von;
+  }
+  if (filter.erstellt_bis) {
+    conditions.push("i.erstellt_am < date($erstellt_bis, '+1 day')");
+    params.$erstellt_bis = filter.erstellt_bis;
+  }
 
   const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
   const limit = filter.limit ?? 20;

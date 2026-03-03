@@ -135,6 +135,8 @@ export interface ImmobilienFilter {
   flaeche_max?: number;
   zimmer_min?: number;
   zimmer_max?: number;
+  erstellt_von?: string;
+  erstellt_bis?: string;
   sort_by?: SortColumn;
   sort_order?: SortOrder;
   gruppe?: "kontakt";

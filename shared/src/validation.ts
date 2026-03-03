@@ -83,6 +83,8 @@ export const immobilienFilterSchema = z.object({
   flaeche_max: z.coerce.number().optional(),
   zimmer_min: z.coerce.number().optional(),
   zimmer_max: z.coerce.number().optional(),
+  erstellt_von: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  erstellt_bis: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   sort_by: z.enum([
     "strasse", "typ", "ort", "preis", "wohnflaeche", "zimmeranzahl",
     "status", "baujahr", "grundstuecksflaeche", "kontakt_name",

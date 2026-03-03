@@ -40,6 +40,7 @@ const columns: Column[] = [
   { key: "wohnflaeche", label: "Fläche", align: "right" },
   { key: "zimmeranzahl", label: "Zimmer", align: "right" },
   { key: "status", label: "Status" },
+  { key: "erstellt_am", label: "Hinzugefügt am" },
 ];
 
 function renderRow(immo: Immobilie) {
@@ -67,6 +68,9 @@ function renderRow(immo: Immobilie) {
       </td>
       <td className="px-4 py-3">
         <StatusBadge status={immo.status} />
+      </td>
+      <td className="px-4 py-3 whitespace-nowrap text-gray-500">
+        {new Date(immo.erstellt_am).toLocaleDateString("de-DE")}
       </td>
     </tr>
   );
