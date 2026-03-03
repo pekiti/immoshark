@@ -12,15 +12,51 @@ Lokale Webanwendung zur Verwaltung von Immobiliendaten. Importiere Objekte per C
 
 ---
 
+## Inhaltsverzeichnis
+
+- [Zweck](#zweck)
+- [Features](#features)
+- [Architektur](#architektur)
+  - [Datenfluss](#datenfluss)
+  - [Tech-Stack](#tech-stack)
+  - [Designentscheidungen](#designentscheidungen)
+- [Voraussetzungen](#voraussetzungen)
+- [Installation & Start](#installation--start)
+- [Daten-Schema](#daten-schema)
+  - [immobilien — Haupttabelle](#immobilien--haupttabelle)
+  - [immobilien_bilder — Bildreferenzen](#immobilien_bilder--bildreferenzen)
+  - [immobilien_fts — Volltextsuche (FTS5)](#immobilien_fts--volltextsuche-fts5)
+  - [ER-Diagramm](#er-diagramm)
+- [API-Endpunkte](#api-endpunkte)
+- [Projektstruktur](#projektstruktur)
+- [Lizenz](#lizenz)
+
+---
+
 ## Zweck
 
 ImmoShark richtet sich an Immobilienmakler, die eine schlanke, lokale Lösung zum Verwalten ihres Bestands brauchen:
 
 - **CSV-Import** — Bestehende Daten aus Tabellenkalkulationen übernehmen (deutsche Formate: `;`-Trennzeichen, Dezimalkomma)
-- **Volltextsuche** — Über Adressen, Beschreibungen und Kontaktdaten suchen (FTS5 mit Unicode-Support für Umlaute)
+- **Volltextsuche** — Über alle Textfelder suchen (Adressen, Beschreibungen, Kontaktdaten, Notizen, Status u.v.m.)
 - **CRUD-Verwaltung** — Immobilien anlegen, bearbeiten, löschen mit Validierung
 - **Dashboard** — Bestand auf einen Blick: Statistiken, Schnellsuche, letzte Objekte
 - **Filterbare Liste** — Nach Typ, Status, Ort, Preis, Fläche und Zimmerzahl filtern
+
+---
+
+## Features
+
+| Feature | Beschreibung |
+|---------|-------------|
+| **Sortierbare Spalten** | Alle Tabellenspalten per Klick sortierbar (aufsteigend → absteigend → unsortiert) |
+| **Schieberegler-Filter** | Preis und Zimmeranzahl per Slider oder Direkteingabe filtern |
+| **Such-Button** | Filter werden lokal aufgebaut und erst beim Klick auf „Suchen" oder Enter ausgelöst |
+| **Notizen** | Freitextfeld (max. 500 Zeichen) für interne Notizen pro Objekt |
+| **Kontakt-Gruppierung** | Objekte nach Ansprechpartner gruppiert anzeigen |
+| **Volltextsuche** | FTS5-Suche über 13 Textfelder + LIKE-Fallback für numerische Felder |
+| **CSV-Import** | 4-Schritt-Wizard: Upload → Spalten-Mapping (mit Auto-Erkennung) → Vorschau → Import |
+| **URL-basierte Filter** | Alle Filterparameter in der URL — bookmarkbar, teilbar |
 
 ---
 
@@ -28,7 +64,7 @@ ImmoShark richtet sich an Immobilienmakler, die eine schlanke, lokale Lösung zu
 
 ImmoShark ist ein **Bun-Monorepo** mit drei Paketen:
 
-```
+```text
 immoshark/
 ├── shared/          @immoshark/shared — Types, Enums, Zod-Validierung
 ├── server/          @immoshark/server — Express 5 REST-API
@@ -38,7 +74,7 @@ immoshark/
 
 ### Datenfluss
 
-```
+```text
 Browser (React SPA)
     │
     │  fetch /api/*
@@ -68,9 +104,11 @@ SQLite (WAL-Modus, FTS5)
 ### Designentscheidungen
 
 - **Kein ORM** — Raw SQL via `bun:sqlite` ist schneller und expliziter. Das Mapping zwischen camelCase (TypeScript) und snake_case (SQL) findet im Service-Layer statt.
-- **FTS5 mit `unicode61` Tokenizer** — Deutsche Umlaute (ä, ö, ü, ß) werden korrekt tokenisiert. Sync-Triggers halten den FTS-Index automatisch aktuell.
+- **FTS5 mit `unicode61` Tokenizer** — Deutsche Umlaute (ä, ö, ü, ß) werden korrekt tokenisiert. Sync-Triggers halten den FTS-Index automatisch aktuell. Numerische Felder (Preis, Baujahr etc.) werden zusätzlich per LIKE-Fallback durchsucht.
 - **URL-basierte Filter** — Alle Filterparameter liegen in der URL. Das macht Filter bookmarkbar und braucht keinen globalen State-Manager.
+- **SQL-Injection-Schutz bei Sortierung** — Sortierbare Spalten werden gegen eine Whitelist validiert, da `ORDER BY`-Spalten nicht über parametrisierte Queries geschützt werden können.
 - **Bilder als separate Tabelle** — Statt JSON-Array in der Immobilien-Tabelle. Ermöglicht Sortierung und zukünftige Erweiterungen.
+- **Additive Migration** — Bestehende Datenbanken werden automatisch erweitert (ALTER TABLE, FTS-Index-Rebuild), ohne Datenverlust.
 
 ---
 
@@ -79,7 +117,7 @@ SQLite (WAL-Modus, FTS5)
 | Tool | Version | Zweck | Installation |
 |------|---------|-------|-------------|
 | **Git** | >= 2.x | Versionskontrolle | [git-scm.com](https://git-scm.com/) oder `brew install git` |
-| **Bun** | >= 1.1 | Runtime, Paketmanager, SQLite | [bun.sh/install](https://bun.sh/) |
+| **Bun** | >= 1.1 | Runtime, Paketmanager, SQLite | [bun.sh](https://bun.sh/) |
 
 Bun ersetzt Node.js, npm und einen separaten TypeScript-Compiler. Es bringt native SQLite-Bindings mit — dadurch entfällt eine separate SQLite-Installation.
 
@@ -88,6 +126,7 @@ Bun ersetzt Node.js, npm und einen separaten TypeScript-Compiler. Es bringt nati
 ### Plattform-spezifisch
 
 **macOS:**
+
 ```bash
 # Xcode Command Line Tools (für Git)
 xcode-select --install
@@ -97,12 +136,14 @@ curl -fsSL https://bun.sh/install | bash
 ```
 
 **Linux (Ubuntu/Debian):**
+
 ```bash
 sudo apt update && sudo apt install -y git curl unzip
 curl -fsSL https://bun.sh/install | bash
 ```
 
 **Windows (WSL2):**
+
 ```bash
 # In WSL2-Terminal:
 curl -fsSL https://bun.sh/install | bash
@@ -128,6 +169,7 @@ bun run dev
 ```
 
 Das startet zwei Prozesse:
+
 - **API-Server** auf `http://localhost:3002` (Express + SQLite)
 - **Frontend** auf `http://localhost:5173` (Vite mit API-Proxy)
 
@@ -169,17 +211,18 @@ Alle Immobilienobjekte mit Adresse, Kennzahlen, Energieausweis und Kontaktdaten.
 | `baujahr` | INTEGER | — | Baujahr (1800–aktuell+5) |
 | `beschreibung` | TEXT | — | Freitext-Beschreibung des Objekts |
 | `provision` | TEXT | — | Provisionsinformation (z.B. "3,57% inkl. MwSt.") |
-| `energieausweis_klasse` | TEXT | — | Energieeffizienzklasse: `A+`, `A`, `B`, `C`, `D`, `E`, `F`, `G`, `H` |
+| `energieausweis_klasse` | TEXT | — | Energieeffizienzklasse: `A+`, `A`, `B`…`H` |
 | `energieausweis_verbrauch` | REAL | — | Energieverbrauch in kWh/m²a |
 | `kontakt_name` | TEXT | — | Ansprechpartner |
 | `kontakt_telefon` | TEXT | — | Telefonnummer |
 | `kontakt_email` | TEXT | — | E-Mail-Adresse |
 | `expose_nummer` | TEXT | — | Eindeutige Exposé-Nummer (`UNIQUE`) |
+| `notizen` | TEXT | — | Interne Notizen (max. 500 Zeichen) |
 | `status` | TEXT | ja | Objektstatus: `verfuegbar`, `reserviert`, `verkauft` |
 | `erstellt_am` | TEXT | auto | ISO-Timestamp, gesetzt bei INSERT |
 | `aktualisiert_am` | TEXT | auto | ISO-Timestamp, aktualisiert bei UPDATE |
 
-**Indizes:** `ort`, `plz`, `typ`, `status`, `preis`
+**Indizes:** `ort`, `plz`, `typ`, `status`, `preis`, `kontakt_name`
 
 ### `immobilien_bilder` — Bildreferenzen
 
@@ -193,38 +236,40 @@ Alle Immobilienobjekte mit Adresse, Kennzahlen, Energieausweis und Kontaktdaten.
 
 ### `immobilien_fts` — Volltextsuche (FTS5)
 
-Virtueller FTS5-Index über ausgewählte Spalten der `immobilien`-Tabelle. Wird automatisch durch Triggers synchronisiert (INSERT, UPDATE, DELETE).
+Virtueller FTS5-Index über 13 Text-Spalten der `immobilien`-Tabelle. Wird automatisch durch Triggers synchronisiert (INSERT, UPDATE, DELETE).
 
-**Indizierte Felder:** `strasse`, `hausnummer`, `plz`, `ort`, `beschreibung`, `kontakt_name`, `expose_nummer`
+**Indizierte Felder:** `strasse`, `hausnummer`, `plz`, `ort`, `beschreibung`, `kontakt_name`, `kontakt_telefon`, `kontakt_email`, `expose_nummer`, `notizen`, `provision`, `typ`, `status`
 
 **Tokenizer:** `unicode61` — unterstützt deutsche Umlaute und diakritische Zeichen.
 
 ### ER-Diagramm
 
-```
-┌──────────────────────┐        ┌─────────────────────┐
-│     immobilien       │        │  immobilien_bilder   │
-├──────────────────────┤        ├─────────────────────┤
-│ id             PK    │──1:N──▶│ id             PK   │
-│ strasse              │        │ immobilie_id   FK   │
-│ hausnummer           │        │ url                 │
-│ plz                  │        │ beschreibung        │
-│ ort                  │        │ reihenfolge         │
-│ preis                │        └─────────────────────┘
+```text
+┌──────────────────────┐        ┌──────────────────────┐
+│     immobilien       │        │  immobilien_bilder    │
+├──────────────────────┤        ├──────────────────────┤
+│ id             PK    │──1:N──▶│ id             PK    │
+│ strasse              │        │ immobilie_id   FK    │
+│ hausnummer           │        │ url                  │
+│ plz                  │        │ beschreibung         │
+│ ort                  │        │ reihenfolge          │
+│ preis                │        └──────────────────────┘
 │ wohnflaeche          │
-│ grundstuecksflaeche  │        ┌─────────────────────┐
-│ zimmeranzahl         │        │   immobilien_fts    │
-│ typ                  │        │ (FTS5 Virtual Table)│
-│ baujahr              │        ├─────────────────────┤
-│ beschreibung         │──sync─▶│ strasse             │
-│ provision            │  via   │ hausnummer          │
-│ energieausweis_*     │triggers│ plz                 │
-│ kontakt_*            │        │ ort                 │
-│ expose_nummer  UQ    │        │ beschreibung        │
-│ status               │        │ kontakt_name        │
-│ erstellt_am          │        │ expose_nummer       │
-│ aktualisiert_am      │        └─────────────────────┘
-└──────────────────────┘
+│ grundstuecksflaeche  │        ┌──────────────────────┐
+│ zimmeranzahl         │        │   immobilien_fts     │
+│ typ                  │        │ (FTS5 Virtual Table) │
+│ baujahr              │        ├──────────────────────┤
+│ beschreibung         │──sync─▶│ strasse              │
+│ provision            │  via   │ hausnummer           │
+│ energieausweis_*     │triggers│ plz, ort             │
+│ kontakt_*            │        │ beschreibung         │
+│ expose_nummer  UQ    │        │ kontakt_name         │
+│ notizen              │        │ kontakt_telefon      │
+│ status               │        │ kontakt_email        │
+│ erstellt_am          │        │ expose_nummer        │
+│ aktualisiert_am      │        │ notizen, provision   │
+└──────────────────────┘        │ typ, status          │
+                                └──────────────────────┘
 ```
 
 ---
@@ -234,7 +279,7 @@ Virtueller FTS5-Index über ausgewählte Spalten der `immobilien`-Tabelle. Wird 
 | Methode | Pfad | Beschreibung |
 |---------|------|--------------|
 | `GET` | `/api/health` | Health-Check |
-| `GET` | `/api/immobilien` | Liste (paginiert, filterbar, FTS-Suche via `?suche=`) |
+| `GET` | `/api/immobilien` | Liste (paginiert, filterbar, sortierbar, FTS-Suche) |
 | `GET` | `/api/immobilien/:id` | Detailansicht inkl. Bilder |
 | `POST` | `/api/immobilien` | Neues Objekt anlegen |
 | `PUT` | `/api/immobilien/:id` | Objekt aktualisieren |
@@ -243,11 +288,11 @@ Virtueller FTS5-Index über ausgewählte Spalten der `immobilien`-Tabelle. Wird 
 | `POST` | `/api/csv/upload` | CSV hochladen (gibt Headers + Vorschau zurück) |
 | `POST` | `/api/csv/import` | CSV importieren mit Spalten-Mapping |
 
-**Filter-Parameter** für `GET /api/immobilien`:
+### Filter-Parameter für `GET /api/immobilien`
 
 | Parameter | Typ | Beispiel | Beschreibung |
 |-----------|-----|----------|-------------|
-| `suche` | string | `?suche=München` | FTS5-Volltextsuche (Prefix-Matching) |
+| `suche` | string | `?suche=München` | FTS5-Volltextsuche über alle Textfelder (Prefix-Matching) |
 | `typ` | enum | `?typ=wohnung` | Objekttyp filtern |
 | `status` | enum | `?status=verfuegbar` | Status filtern |
 | `ort` | string | `?ort=Berlin` | Ort (Teilstring-Suche) |
@@ -257,22 +302,28 @@ Virtueller FTS5-Index über ausgewählte Spalten der `immobilien`-Tabelle. Wird 
 | `flaeche_max` | number | `?flaeche_max=120` | Höchst-Wohnfläche (m²) |
 | `zimmer_min` | number | `?zimmer_min=2` | Mindest-Zimmeranzahl |
 | `zimmer_max` | number | `?zimmer_max=4` | Höchst-Zimmeranzahl |
+| `sort_by` | enum | `?sort_by=preis` | Sortierung nach Spalte (`strasse`, `typ`, `ort`, `preis`, `wohnflaeche`, `zimmeranzahl`, `status`, `baujahr`, `grundstuecksflaeche`, `kontakt_name`, `erstellt_am`, `aktualisiert_am`) |
+| `sort_order` | enum | `?sort_order=desc` | Sortierrichtung: `asc` (Default) oder `desc` |
+| `gruppe` | enum | `?gruppe=kontakt` | Ergebnisse nach Kontaktperson gruppieren |
 | `seite` | number | `?seite=2` | Seitennummer (Default: 1) |
 | `limit` | number | `?limit=10` | Ergebnisse pro Seite (Default: 20, Max: 100) |
 
-**Response-Format:**
+### Response-Format
 
 Erfolg (Einzel):
+
 ```json
 { "data": { "id": 1, "strasse": "Musterstraße", "..." : "..." } }
 ```
 
 Erfolg (Liste mit Pagination):
+
 ```json
 { "data": [...], "meta": { "seite": 1, "limit": 20, "gesamt": 42 } }
 ```
 
 Fehler:
+
 ```json
 { "error": { "message": "Beschreibung", "code": "VALIDATION_ERROR" } }
 ```
@@ -281,7 +332,7 @@ Fehler:
 
 ## Projektstruktur
 
-```
+```text
 immoshark/
 ├── package.json                  Workspace-Root, Scripts
 ├── tsconfig.base.json            Gemeinsame TypeScript-Konfiguration
@@ -300,7 +351,7 @@ immoshark/
 │   │   ├── immobilien.ts         CRUD + Stats Endpoints
 │   │   └── csv.ts                CSV Upload + Import
 │   ├── services/
-│   │   ├── immobilien.service.ts Datenbank-Queries, Filter, FTS
+│   │   ├── immobilien.service.ts Datenbank-Queries, Filter, Sortierung, FTS
 │   │   └── csv.service.ts        CSV-Parsing, Delimiter-Detection, Mapping
 │   └── middleware/
 │       ├── error.ts              Globaler Error-Handler
@@ -317,8 +368,8 @@ immoshark/
 │       ├── components/
 │       │   ├── layout/           Sidebar, Header, Layout
 │       │   ├── immobilien/       Table, FilterBar, StatusBadge
-│       │   ├── csv/              (CSV-Wizard inline in CsvImport.tsx)
-│       │   └── ui/               Button, Input, Select, Modal, Pagination, Toast
+│       │   └── ui/               Button, Input, Select, Modal, Pagination,
+│       │                         Toast, RangeSlider
 │       └── lib/utils.ts          Formatierung (Preis, Fläche, Labels)
 └── data/
     └── beispiel-immobilien.csv   Beispiel-CSV mit deutschen Formaten
