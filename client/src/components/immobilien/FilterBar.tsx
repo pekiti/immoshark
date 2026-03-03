@@ -106,24 +106,28 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
           step={10_000}
           formatValue={formatPreis}
         />
-        <div className="grid grid-cols-2 gap-3">
-          <Input
-            placeholder="Fläche min"
-            type="number"
-            value={draft.flaeche_min ?? ""}
-            onChange={(e) => set({ flaeche_min: e.target.value ? Number(e.target.value) : undefined })}
-          />
-          <Input
-            placeholder="Fläche max"
-            type="number"
-            value={draft.flaeche_max ?? ""}
-            onChange={(e) => set({ flaeche_max: e.target.value ? Number(e.target.value) : undefined })}
-          />
-        </div>
+        <RangeSlider
+          label="Fläche min"
+          value={draft.flaeche_min}
+          onChange={(v) => set({ flaeche_min: v })}
+          min={0}
+          max={500}
+          step={5}
+          formatValue={(v) => `${v} m²`}
+        />
       </div>
 
-      {/* Row 3: Zimmer sliders */}
+      {/* Row 3: Fläche max + Zimmer sliders */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <RangeSlider
+          label="Fläche max"
+          value={draft.flaeche_max}
+          onChange={(v) => set({ flaeche_max: v })}
+          min={0}
+          max={2000}
+          step={10}
+          formatValue={(v) => `${v} m²`}
+        />
         <RangeSlider
           label="Zimmer min"
           value={draft.zimmer_min}
