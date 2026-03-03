@@ -8,6 +8,10 @@
     "dev:server": "bun run --cwd server dev",
     "dev:client": "bun run --cwd client dev",
     "build": "bun run --cwd client build",
-    "seed": "bun run --cwd server seed"
+    "seed": "bun run --cwd server seed",
+    "test": "bun test",
+    "test:unit": "bun test shared/ client/ server/src/__tests__/unit/",
+    "test:integration": "bun test server/src/__tests__/integration/",
+    "test:smoke": "bun test server/src/__tests__/smoke/"
   }
 }

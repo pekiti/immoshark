@@ -7,6 +7,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)](https://expressjs.com/)
 [![SQLite](https://img.shields.io/badge/SQLite-WAL+FTS5-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![Tests](https://img.shields.io/badge/Tests-105_passing-brightgreen)](#tests)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Lokale Webanwendung zur Verwaltung von Immobiliendaten. Importiere Objekte per CSV, durchsuche den Bestand mit Volltextsuche und pflege alle Daten per CRUD-Oberfläche — alles läuft lokal, ohne Cloud-Abhängigkeiten.
@@ -27,6 +28,7 @@ Lokale Webanwendung zur Verwaltung von Immobiliendaten. Importiere Objekte per C
   - [Designentscheidungen](#designentscheidungen)
 - [Voraussetzungen](#voraussetzungen)
 - [Installation & Start](#installation--start)
+- [Tests](#tests)
 - [Daten-Schema](#daten-schema)
   - [immobilien — Haupttabelle](#immobilien--haupttabelle)
   - [immobilien_bilder — Bildreferenzen](#immobilien_bilder--bildreferenzen)
@@ -95,7 +97,7 @@ Express API (:3002)
     │  Service Layer (raw SQL)
     ▼
 SQLite (WAL-Modus, FTS5)
-    └── server/immoshark.db
+    └── data/immoshark.db
 ```
 
 ### Tech-Stack
@@ -108,6 +110,7 @@ SQLite (WAL-Modus, FTS5)
 | Validierung | **Zod** | Shared zwischen Client und Server, Runtime-Validierung mit Typ-Inferenz |
 | Frontend | **React 19** + **Vite** | Schnelles HMR, modernes JSX-Transform |
 | Styling | **Tailwind CSS 4** | Utility-First, kein separates Config-File nötig (v4 Vite Plugin) |
+| Tests | **bun test** | Built-in Test-Runner, zero-config, keine Extra-Dependencies |
 
 ### Designentscheidungen
 
@@ -118,6 +121,7 @@ SQLite (WAL-Modus, FTS5)
 - **Bilder als separate Tabelle** — Statt JSON-Array in der Immobilien-Tabelle. Ermöglicht Sortierung und zukünftige Erweiterungen.
 - **Additive Migration** — Bestehende Datenbanken werden automatisch erweitert (ALTER TABLE, FTS-Index-Rebuild), ohne Datenverlust.
 - **Deutsches CSV-Format** — Automatische Erkennung von `;` vs. `,` Delimiter, Dezimalkomma-Konvertierung (`1.234,56` → `1234.56`) und deutsches Datumsformat (`TT.MM.JJJJ` → `YYYY-MM-DD`).
+- **Test-Seam per `setDb()`** — Minimaler Injection-Point, damit Tests eine In-Memory-DB nutzen können, ohne Service-Code zu ändern.
 
 ---
 
@@ -199,6 +203,41 @@ bun run dev:client    # Nur Frontend (Port 5173)
 ```bash
 bun run build         # Baut das Frontend nach client/dist/
 ```
+
+---
+
+## Tests
+
+ImmoShark hat eine umfassende Test-Suite mit 105 automatisierten Tests. Alle Tests laufen mit `bun test` (Built-in, zero-config, keine extra Dependencies).
+
+```bash
+bun test              # Alle Tests (~150ms)
+bun test:unit         # Nur Unit-Tests (Validation, Utils, CSV, Services)
+bun test:integration  # Nur Integration-Tests (HTTP API, CSV-Flow)
+bun test:smoke        # Nur Smoke-Tests (Migration, Health)
+```
+
+### Test-Übersicht
+
+| Suite | Datei | Tests | Prüft |
+|-------|-------|-------|-------|
+| Smoke | `server/src/__tests__/smoke/smoke.test.ts` | 4 | Migration, Idempotenz, FTS-Triggers, Health |
+| Unit | `shared/src/__tests__/validation.test.ts` | 21 | Zod-Schemas: Create, Update, Filter, CSV-Mapping |
+| Unit | `client/src/__tests__/utils.test.ts` | 15 | formatPreis, formatFlaeche, typLabel, statusLabel, statusColor |
+| Unit | `server/src/__tests__/unit/csv-parsing.test.ts` | 10 | CSV-Parsing, dt. Zahlen/Datum, Validierungsfehler |
+| Unit | `server/src/__tests__/unit/immobilien-service.test.ts` | 21 | Alle 7 Service-Funktionen (CRUD, Filter, Stats) |
+| Integration | `server/src/__tests__/integration/api.test.ts` | 16 | HTTP CRUD, Filter, FTS-Suche, Stats-Endpoint |
+| Integration | `server/src/__tests__/integration/csv.test.ts` | 6 | Upload → Import Flow, Fehlerfälle |
+| | | **105** | |
+
+### Teststrategie
+
+- **DB-Isolation:** Jede Test-Suite bekommt eine frische In-Memory-SQLite-DB via `setDb()`
+- **HTTP-Tests:** Express wird auf einem zufälligen Port gestartet (`app.listen(0)`) + `fetch()`
+- **Keine Mocks:** Tests laufen gegen echte DB und echte Middleware — kein Mocking nötig
+- **Shared Helpers:** `server/src/__tests__/helpers.ts` enthält `createTestDb()`, `makeImmobilie()`, `seedTestData()`, `createTestServer()`
+
+Detaillierte Informationen: [Tester-Dokumentation](docs/stakeholder/tester.md)
 
 ---
 
@@ -360,7 +399,7 @@ immoshark/
 │   ├── index.ts                  Server-Einstiegspunkt
 │   ├── app.ts                    Express-Setup, Middleware, Routing
 │   ├── db/
-│   │   ├── database.ts           SQLite-Singleton (WAL, Foreign Keys)
+│   │   ├── database.ts           SQLite-Singleton (WAL, Foreign Keys, setDb)
 │   │   ├── migrate.ts            Schema-Migration (Tabellen, FTS5, Triggers)
 │   │   └── seed.ts               6 Beispiel-Immobilien
 │   ├── routes/
@@ -370,9 +409,14 @@ immoshark/
 │   │   ├── immobilien.service.ts Datenbank-Queries, Filter, Sortierung, FTS
 │   │   └── csv.service.ts        CSV-Parsing, Delimiter-Detection, Mapping,
 │   │                             dt. Zahlen-/Datumsformat-Konvertierung
-│   └── middleware/
-│       ├── error.ts              Globaler Error-Handler
-│       └── validate.ts           Zod-Validierungs-Middleware
+│   ├── middleware/
+│   │   ├── error.ts              Globaler Error-Handler
+│   │   └── validate.ts           Zod-Validierungs-Middleware
+│   └── __tests__/
+│       ├── helpers.ts            Test-Infrastruktur (DB, Server, Seed, Fixtures)
+│       ├── smoke/                Migrations- und Health-Tests
+│       ├── unit/                 Service- und CSV-Parsing-Tests
+│       └── integration/         HTTP-API- und CSV-Flow-Tests
 ├── client/
 │   ├── index.html                SPA-Einstieg
 │   ├── vite.config.ts            Vite + Tailwind v4 + API-Proxy
@@ -387,19 +431,31 @@ immoshark/
 │       │   ├── immobilien/       Table, FilterBar, StatusBadge
 │       │   └── ui/               Button, Input, Select, Modal, Pagination,
 │       │                         Toast, RangeSlider
-│       └── lib/utils.ts          Formatierung (Preis, Fläche, Labels)
-└── data/
-    ├── beispiel-immobilien.csv   500 Beispiel-Immobilien (dt. CSV-Format)
-    └── generate-csv.ts           Generator-Script für realistische Testdaten
+│       ├── lib/utils.ts          Formatierung (Preis, Fläche, Labels)
+│       └── __tests__/            Client-Utility-Tests
+├── data/
+│   ├── beispiel-immobilien.csv   500 Beispiel-Immobilien (dt. CSV-Format)
+│   └── generate-csv.ts           Generator-Script für realistische Testdaten
+└── docs/
+    └── stakeholder/              Rollenspezifische Dokumentation
 ```
 
 ---
 
 ## Dokumentation
 
-| Dokument | Beschreibung |
-|----------|-------------|
-| [Benutzeranleitung](docs/enduser/anleitung.md) | Anleitung für Endanwender mit Screenshots: Dashboard, Immobilien-Liste, Detailansicht, Formular und CSV-Import |
+### Stakeholder-Dokumentation
+
+Rollenspezifische Dokumente — jedes zugeschnitten auf die Informationsbedürfnisse der jeweiligen Zielgruppe:
+
+| Dokument | Zielgruppe | Inhalt |
+|----------|------------|--------|
+| [Benutzeranleitung](docs/stakeholder/enduser/anleitung.md) | Endanwender | Bedienung mit Screenshots: Dashboard, Liste, Detail, Formular, CSV-Import |
+| [Projektmanager](docs/stakeholder/projektmanager.md) | Projektmanagement | Geschäftswert, Status, Risiken, Meilensteine |
+| [Backend-Entwickler](docs/stakeholder/backend-entwickler.md) | Backend-Entwicklung | Architektur, DB-Patterns, Service-Layer, Middleware, Konventionen |
+| [Frontend-Entwickler](docs/stakeholder/frontend-entwickler.md) | Frontend-Entwicklung | Komponenten, Hooks, API-Client, Vite-Config, Styling |
+| [Tester / QA](docs/stakeholder/tester.md) | Testing | Test-Suiten, Helfer, manuelle Testszenarien, Edge Cases |
+| [Ops / DevOps](docs/stakeholder/ops-devops.md) | Betrieb / Deployment | Systemanforderungen, Prozess-Management, Backup, Monitoring, Troubleshooting |
 
 ---
 

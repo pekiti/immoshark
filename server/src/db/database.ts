@@ -8,6 +8,10 @@ const DB_PATH = join(PROJECT_ROOT, "data", "immoshark.db");
 
 let db: Database | null = null;
 
+export function setDb(instance: Database) {
+  db = instance;
+}
+
 export function getDb(): Database {
   if (!db) {
     db = new Database(DB_PATH, { create: true });
