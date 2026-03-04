@@ -139,7 +139,8 @@ Das `shared`-Paket liefert Types und Validierung für Frontend und Backend:
 | `ApiError` | `{ error: { message, code } }` |
 | `DashboardStats` | Stats-Payload (gesamt, verfuegbar, ..., nach_typ) |
 | `CsvUploadResult` | Upload-Response (headers, preview, session_id) |
-| `CsvColumnMapping` | `Record<string, TargetField \| null>` |
+| `CsvColumnMappingValue` | `keyof ImmobilieCreateDTO \| "__freitext__" \| null` |
+| `CsvColumnMapping` | `Record<string, CsvColumnMappingValue>` |
 | `CsvMappingSuggestion` | `{ mapping: CsvColumnMapping, source: "llm" \| "dictionary" }` |
 
 ### Enums

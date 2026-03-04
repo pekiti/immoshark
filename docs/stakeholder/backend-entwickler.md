@@ -15,8 +15,8 @@ server/src/
 │   └── csv.ts                Upload + Import + Suggest-Mapping (Multer + In-Memory-Session)
 ├── services/
 │   ├── immobilien.service.ts Queries: list, get, create, update, delete, stats, recent
-│   ├── csv.service.ts        Parsing: Delimiter, dt. Zahlen/Datum, Validation, Import
-│   └── mapping.service.ts    LLM-Spalten-Mapping via GPT-5 (DI-fähig)
+│   ├── csv.service.ts        Parsing, Import, Telefonnormalisierung, Ortskürzel
+│   └── mapping.service.ts    LLM-Spalten-Mapping + Freitext-Extraktion (DI-fähig)
 └── middleware/
     ├── validate.ts           Zod-Schema-Validierung (Body/Query)
     └── error.ts              Globaler Error-Handler (500 + Stack-Trace)
@@ -102,18 +102,23 @@ Die Funktion `migrate(db)` in `migrate.ts` ist vollständig idempotent:
 | Funktion | Zweck |
 |---|---|
 | `parseCsvContent(content)` | Delimiter erkennen, Headers + Preview + total_rows |
-| `importCsvData(content, mapping)` | Voll-Import: Mapping → dt. Zahlen/Datum → Zod-Validation → DB |
+| `importCsvData(content, mapping, callLLM?)` | Voll-Import: Mapping + Freitext-Extraktion → Merge → Normalisierung → Zod-Validation → DB. Async, da LLM-Calls bei `__freitext__`-Spalten |
+| `normalizeGermanPhone(input)` | Deutsche Telefonnummern in `+49 VORWAHL NUMMER`-Format konvertieren |
+| `resolveCityAbbreviation(input)` | Kfz-Kürzel (SB, SLS, HOM, NK, MZG, WND, IGB) zu vollen Stadtnamen auflösen |
 
 Interne Hilfsfunktionen (nicht exportiert):
 - `detectDelimiter`: Zählt `;` vs `,` in der ersten Zeile
 - `parseGermanNumber`: `1.234,56` → `1234.56`
 - `parseGermanDate`: `15.01.2026` → `2026-01-15`
 
+**Merge-Logik bei Freitext-Extraktion:** LLM-extrahierte Felder bilden die Basis, direkte Spalten-Mappings überschreiben. So kann der User z.B. eine Preis-Spalte direkt mappen UND weitere Infos per Freitext extrahieren.
+
 ### `mapping.service.ts`
 
 | Export | Zweck |
 |---|---|
 | `suggestMapping(headers, preview, callLLM?)` | LLM-basierte Spalten-Zuordnung — sendet CSV-Headers + Beispieldaten an GPT-5, validiert Antwort gegen `csvColumnMappingSchema` |
+| `extractFromFreetext(texts, callLLM?, batchSize?)` | Extrahiert strukturierte Immobiliendaten aus Fließtexten. Verarbeitet in Batches (Default: 5 pro LLM-Call). Gibt `Partial<ImmobilieCreateDTO>[]` zurück |
 | `createOpenAICaller()` | Erzeugt den Default-`LLMCaller` mit OpenAI SDK |
 | `LLMCaller` (Type) | `(systemPrompt, userPrompt) => Promise<string>` — injizierbarer Typ für Tests |
 
@@ -139,10 +144,12 @@ GET    /api/stats            → getStats
 ```
 POST   /api/csv/upload           → multer.single("file") → parseCsvContent → session in Map
 POST   /api/csv/suggest-mapping  → session lookup → suggestMapping (GPT-5) → validiertes Mapping
-POST   /api/csv/import           → session lookup → validate mapping → importCsvData
+POST   /api/csv/import           → session lookup → validate mapping → importCsvData (async)
 ```
 
 CSV-Sessions werden in einer In-Memory `Map<string, string>` gespeichert und nach 10 Minuten automatisch gelöscht. Der `suggest-mapping`-Endpoint liest die Session, extrahiert Headers + Preview und übergibt sie dem Mapping-Service. Bei LLM-Fehler: HTTP 502 mit Code `LLM_ERROR`.
+
+**Freitext-Import:** Wenn das Mapping `__freitext__`-Spalten enthält, instanziiert der Import-Handler einen `LLMCaller` und übergibt ihn an `importCsvData()`. Ohne `__freitext__`-Spalten bleibt der Import synchron und ohne LLM-Aufruf.
 
 ---
 

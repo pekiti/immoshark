@@ -75,15 +75,19 @@ LLM-basierter Mapping-Service mit Dependency Injection (Mock-LLM, kein OpenAI-Au
 
 | Bereich | Tests | Prüft |
 |---|---|---|
-| Valides Mapping | 1 | LLM-Antwort wird korrekt geparsed und validiert |
-| Null-Werte | 1 | Nicht-gemappte Spalten bleiben `null` |
-| Ungültiges JSON | 1 | Gibt `null` zurück bei nicht-parsbarer LLM-Antwort |
-| Ungültige Felder | 1 | Gibt `null` zurück bei ungültigen Zielfeld-Namen |
-| LLM-Fehler | 1 | Wirft bei API-Fehler korrekt weiter |
+| `suggestMapping` — Valides Mapping | 1 | LLM-Antwort wird korrekt geparsed und validiert |
+| `suggestMapping` — Null-Werte | 1 | Nicht-gemappte Spalten bleiben `null` |
+| `suggestMapping` — Ungültiges JSON | 1 | Gibt `null` zurück bei nicht-parsbarer LLM-Antwort |
+| `suggestMapping` — Ungültige Felder | 1 | Gibt `null` zurück bei ungültigen Zielfeld-Namen |
+| `suggestMapping` — LLM-Fehler | 1 | Wirft bei API-Fehler korrekt weiter |
+| `extractFromFreetext` — Extraktion | 1 | Strukturierte Daten aus Fließtext extrahiert |
+| `extractFromFreetext` — Batching | 1 | Texte werden in konfigurierbaren Batches verarbeitet |
+| `extractFromFreetext` — LLM-Fehler | 1 | Gibt leere Objekte zurück statt abzubrechen |
+| `extractFromFreetext` — Ungültiges JSON | 1 | Gibt leere Objekte zurück bei unparsebarer Antwort |
 
 ### Unit-Tests: CSV-Parsing (`server/src/__tests__/unit/csv-parsing.test.ts`)
 
-CSV-Import-Pipeline: Parsing, deutsche Formate, Fehlerfälle.
+CSV-Import-Pipeline: Parsing, deutsche Formate, Normalisierung, Fehlerfälle.
 
 | Bereich | Tests | Prüft |
 |---|---|---|
@@ -91,6 +95,8 @@ CSV-Import-Pipeline: Parsing, deutsche Formate, Fehlerfälle.
 | Deutsche Zahlen | 2 | `1.234,56` → `1234.56`, einfache Zahlen |
 | Deutsche Daten | 2 | `15.01.2026` → `2026-01-15`, ISO-Passthrough |
 | Validierungsfehler | 1 | Ungültige Zeilen werden übersprungen + Fehler gemeldet |
+| `normalizeGermanPhone` | 7 | 0-Prefix, 0049-Prefix, +49-Format, Mobilnummern, Sonderzeichen, Nicht-deutsch, leer |
+| `resolveCityAbbreviation` | 5 | SB→Saarbrücken, SLS→Saarlouis, HOM→Homburg, Case-Insensitiv, unbekannte Kürzel |
 
 ### Unit-Tests: Immobilien-Service (`server/src/__tests__/unit/immobilien-service.test.ts`)
 
@@ -125,7 +131,7 @@ Upload → Import Flow über HTTP inkl. Fehlerfälle.
 |---|---|---|
 | Upload | 2 | Headers + Preview + session_id, fehlendes File → 400 |
 | Suggest-Mapping | 1 | Ungültige Session → 400 |
-| Import | 4 | Mapping-Import, ungültige Session, fehlende Session, ungültiges Mapping |
+| Import | 5 | Mapping-Import, `__freitext__`-Mapping, ungültige Session, fehlende Session, ungültiges Mapping |
 
 ---
 
@@ -179,6 +185,26 @@ Ergänzend zu den automatisierten Tests — für explorative QA:
 1. In der Liste: Typ = Wohnung + Status = Verfügbar + Preis max 400.000
 2. Nur passende Objekte sollten angezeigt werden
 3. URL sollte alle Filter enthalten (bookmark-fähig)
+
+### Freitext-Extraktion
+
+1. CSV mit einer Fließtext-Spalte vorbereiten (z.B. "Info" mit Text wie "Wohnung in der Hauptstr. 10, 10115 Berlin, 250.000 Euro")
+2. CSV hochladen
+3. Im Mapping-Schritt die Spalte auf "Freitext-Extraktion (KI)" setzen
+4. Vorschau prüfen → Import starten
+5. In der Immobilien-Liste prüfen: extrahierte Daten sollten in den richtigen Feldern stehen
+6. Test mit gemischtem Mapping: eine Spalte direkt mappen (z.B. "Preis") + Freitext-Spalte → direktes Mapping muss Vorrang haben
+
+### Telefonnormalisierung
+
+1. CSV importieren mit Telefonnummer-Spalte, verschiedene Formate: `0681/12345`, `+49 681 12345`, `0171-1234567`
+2. In der Detailansicht prüfen: alle Nummern sollten im Format `+49 VORWAHL NUMMER` stehen
+
+### Ortsnamen-Auflösung
+
+1. CSV importieren mit Ort-Spalte, Kfz-Kürzel verwenden: `SB`, `SLS`, `HOM`
+2. In der Detailansicht prüfen: Ortsnamen sollten aufgelöst sein (Saarbrücken, Saarlouis, Homburg)
+3. Nicht-Kürzel (z.B. "München") sollten unverändert bleiben
 
 ### Edge Cases
 

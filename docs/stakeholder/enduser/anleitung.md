@@ -192,6 +192,7 @@ Nach dem Hochladen werden die Spalten Ihrer CSV-Datei angezeigt. ImmoShark versu
 - Prüfen Sie die automatische Zuordnung (mit oder ohne KI)
 - Passen Sie die Zuordnung bei Bedarf über die Dropdown-Menüs an
 - Nicht benötigte Spalten können Sie auf "Nicht zuordnen" belassen
+- **Freitext-Extraktion (KI):** Wenn eine Spalte Fließtext enthält (z. B. eine Spalte mit Immobilienbeschreibungen), wählen Sie "Freitext-Extraktion (KI)". GPT-5 extrahiert dann automatisch Adresse, Preis, Kontaktdaten etc. aus dem Text
 - Klicken Sie auf **Weiter zur Vorschau**
 
 ### Schritt 3: Vorschau prüfen
@@ -211,6 +212,9 @@ Sie sehen eine Vorschau der ersten Zeilen mit der gewählten Zuordnung. Prüfen 
 - **Status-Werte:** Verwenden Sie `verfuegbar`, `reserviert` oder `verkauft`
 - **Datumswerte:** Datumsangaben (z. B. "Veröffentlicht am") können im deutschen Format `TT.MM.JJJJ` oder ISO-Format `JJJJ-MM-TT` eingegeben werden
 - **Leere Felder:** Optionale Felder dürfen leer gelassen werden
+- **Telefonnummern:** Werden automatisch in das Format `+49 VORWAHL NUMMER` normalisiert (z. B. `0681/12345` → `+49 681 12345`)
+- **Ortskürzel:** Regionale Kfz-Kürzel wie SB, SLS oder HOM werden automatisch zu den vollen Stadtnamen (Saarbrücken, Saarlouis, Homburg) aufgelöst
+- **Freitext-Spalten:** Wenn alle Informationen in einer Fließtext-Spalte stehen, wählen Sie "Freitext-Extraktion (KI)" — GPT-5 extrahiert die relevanten Daten automatisch
 
 ---
 
