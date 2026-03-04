@@ -69,6 +69,17 @@ Formatierungs- und Label-Funktionen für die UI.
 | `statusLabel` | 4 | Alle 3 Status + Fallback |
 | `statusColor` | 4 | CSS-Klassen pro Status + Fallback |
 
+### Unit-Tests: Settings / Profile-CRUD (`client/src/__tests__/settings.test.ts`)
+
+Profil-Speicherung und -Verwaltung (localStorage-basiert).
+
+| Funktion | Tests | Prüft |
+|---|---|---|
+| `getProfiles` | 2 | Leere Liste, gespeicherte Profile |
+| `saveProfile` | 3 | Neues Profil, Überschreiben by ID, Default-Invariante (nur ein Default gleichzeitig) |
+| `getDefaultProfile` | 2 | null wenn kein Default, korrektes Default-Profil |
+| `deleteProfile` | 2 | Löschen, nicht-existierendes Profil |
+
 ### Unit-Tests: Mapping-Service (`server/src/__tests__/unit/mapping.test.ts`)
 
 LLM-basierter Mapping-Service mit Dependency Injection (Mock-LLM, kein OpenAI-Aufruf).
@@ -167,12 +178,27 @@ Ergänzend zu den automatisierten Tests — für explorative QA:
 7. Importieren → Meldung mit importiert/übersprungen/Fehler prüfen
 8. In der Immobilien-Liste die importierten Datensätze verifizieren
 
+### Import-Profile
+
+1. CSV hochladen → Mapping konfigurieren → "Speichern" klicken
+2. "Neues Profil anlegen" wählen → Name eingeben (z.B. "Saarland-Format") → Speichern
+3. Toast-Benachrichtigung "Profil gespeichert" prüfen
+4. Profil im Dropdown sichtbar → auswählen → Mapping wird übernommen
+5. Mapping ändern → "Speichern" → "Bestehendes überschreiben" wählen → Speichern
+6. Erneut CSV hochladen → Profil aus Dropdown wählen → nur passende Header werden gemappt, neue Spalten bleiben "Nicht importieren"
+7. Profil mit "Als Standard-Profil setzen" speichern → neue CSV hochladen → Standard-Profil wird automatisch angewendet + im Dropdown vorausgewählt
+8. In Einstellungen → Profil-Liste prüfen: Name, Erstelldatum, Spaltenanzahl, KI-Status, Standard-Badge
+9. "Als Standard" Button klicken → Badge wechselt → anderes Profil als Standard setzen → nur eines kann Standard sein
+10. "Löschen" klicken → Bestätigung → Profil verschwindet
+
 ### Einstellungen-Seite
 
 1. Unter `Einstellungen` navigieren
 2. KI-Toggle prüfen (Default: aktiviert)
 3. Toggle umschalten → Seite neu laden → Einstellung muss erhalten bleiben (localStorage)
 4. CSV-Import starten → KI-Toggle im Mapping-Schritt sollte dem Settings-Default entsprechen
+5. Import-Profile-Abschnitt prüfen: zeigt alle gespeicherten Profile mit Metadaten
+6. Wenn keine Profile vorhanden: "Keine Profile vorhanden." angezeigt
 
 ### Volltextsuche
 
@@ -217,3 +243,8 @@ Ergänzend zu den automatisierten Tests — für explorative QA:
 | Gleiche Exposé-Nummer doppelt anlegen | Unique-Constraint-Fehler |
 | CSV mit KI-Toggle importieren (ohne API Key) | Fallback auf Dictionary-Mapping, kein Fehler sichtbar |
 | KI-Toggle in Settings ändern + neuen Import starten | Import übernimmt neuen Default |
+| Profil ohne Namen speichern | Speichern-Button deaktiviert |
+| Profil laden mit anderer CSV (andere Spalten) | Nur passende Header werden gemappt, neue bleiben `null` |
+| Standard-Profil setzen + CSV hochladen | Standard-Profil wird automatisch angewendet, kein autoMap/KI-Call |
+| Alle Profile löschen + Einstellungen prüfen | "Keine Profile vorhanden." angezeigt |
+| localStorage leeren + Seite neu laden | Profile-Liste leer, kein Fehler |

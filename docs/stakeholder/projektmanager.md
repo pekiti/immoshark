@@ -13,7 +13,7 @@ ImmoShark ist eine lokale Webanwendung zur Verwaltung von Immobiliendaten. Sie w
 | Version | 0.3.0 |
 | Lizenz | MIT |
 | Produktionsbereit | MVP-Stand — Features vollständig, KI-Mapping + Freitext-Extraktion, Deployment-Optimierung offen |
-| Testabdeckung | 128 automatisierte Tests (Unit, Integration, Smoke) |
+| Testabdeckung | 137 automatisierte Tests (Unit, Integration, Smoke) |
 
 ---
 
@@ -31,6 +31,7 @@ Immobilienmakler und kleine Hausverwaltungen, die:
 | Funktion | Nutzen |
 |---|---|
 | **CSV-Import mit KI-Mapping** | Bestehende Datenbestände aus Excel/Calc ohne Neueingabe übernehmen. GPT-5 erkennt unbekannte Spaltenformate und extrahiert strukturierte Daten aus Freitext-Spalten (optional, abschaltbar) |
+| **Import-Profile** | Spalten-Zuordnung als benanntes Profil speichern und wiederverwenden. Standard-Profil wird automatisch beim Upload angewendet — kein wiederholtes manuelles Mapping nötig |
 | **Daten-Normalisierung** | Telefonnummern werden automatisch in +49-Format normalisiert, Kfz-Kürzel (SB, SLS, HOM etc.) zu vollen Stadtnamen aufgelöst |
 | **Volltextsuche** | Über alle 13 Textfelder hinweg sofort finden — Adressen, Kontakte, Notizen |
 | **Dashboard** | Bestandsübersicht auf einen Blick — Statistiken, letzte Objekte, Schnellsuche |
@@ -81,6 +82,7 @@ Die gesamte Datenbank liegt in einer einzigen Datei. Backup = Datei kopieren. Ke
 | Qualität | Automatisierte Tests (Unit, Integration, Smoke) | Abgeschlossen |
 | KI-Integration | GPT-5-basiertes Spalten-Mapping, Einstellungen, Versionierung | Abgeschlossen (v0.2.0) |
 | KI-Extraktion | Freitext-Extraktion, Telefonnormalisierung, Ortsnamen-Auflösung | Abgeschlossen (v0.3.0) |
+| Import-Profile | Speichern/Laden/Verwalten von CSV-Zuordnungsprofilen, Default-Profil | Abgeschlossen |
 | Stabilität | Deployment-Dokumentation, Monitoring | Offen |
 | Erweiterung | Exposé-PDF-Export, Bilderhandlung, Multi-User | Geplant |
 

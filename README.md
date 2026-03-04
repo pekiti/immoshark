@@ -7,7 +7,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)](https://expressjs.com/)
 [![SQLite](https://img.shields.io/badge/SQLite-WAL+FTS5-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-[![Tests](https://img.shields.io/badge/Tests-128_passing-brightgreen)](#tests)
+[![Tests](https://img.shields.io/badge/Tests-137_passing-brightgreen)](#tests)
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--5-412991?logo=openai&logoColor=white)](https://openai.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -51,7 +51,8 @@ ImmoShark richtet sich an Immobilienmakler, die eine schlanke, lokale Lösung zu
 - **CRUD-Verwaltung** — Immobilien anlegen, bearbeiten, löschen mit Validierung
 - **Dashboard** — Bestand auf einen Blick: Statistiken, Schnellsuche, letzte Objekte
 - **Filterbare Liste** — Nach Typ, Status, Ort, Preis, Fläche, Zimmerzahl und Datum filtern
-- **Einstellungen** — KI-Mapping an/aus, Versionsinformation im Header
+- **Import-Profile** — Spalten-Mapping als benanntes Profil speichern und bei zukünftigen Imports laden. Default-Profil wird automatisch angewendet
+- **Einstellungen** — KI-Mapping an/aus, Import-Profile verwalten, Versionsinformation im Header
 
 ---
 
@@ -67,12 +68,13 @@ ImmoShark richtet sich an Immobilienmakler, die eine schlanke, lokale Lösung zu
 | **Notizen** | Freitextfeld (max. 500 Zeichen) für interne Notizen pro Objekt |
 | **Kontakt-Gruppierung** | Objekte nach Ansprechpartner gruppiert anzeigen |
 | **Volltextsuche** | FTS5-Suche über 13 Textfelder + LIKE-Fallback für numerische Felder |
-| **CSV-Import** | 4-Schritt-Wizard: Upload → Spalten-Mapping (mit Auto-Erkennung) → Vorschau → Import. Erkennt dt. Datumsformat (TT.MM.JJJJ) |
+| **CSV-Import** | 4-Schritt-Wizard: Upload → Spalten-Mapping (mit Auto-Erkennung + Profilen) → Vorschau → Import. Erkennt dt. Datumsformat (TT.MM.JJJJ) |
+| **Import-Profile** | Spalten-Mapping + KI-Einstellung als benanntes Profil speichern. Profile laden, überschreiben, löschen. Default-Profil wird beim Upload automatisch angewendet |
 | **KI-Spalten-Mapping** | GPT-5 analysiert CSV-Headers und Beispieldaten, um unbekannte Spaltenformate automatisch den 21 Datenbankfeldern zuzuordnen. Per Toggle ein-/ausschaltbar |
 | **Freitext-Extraktion (KI)** | GPT-5 extrahiert strukturierte Immobiliendaten (Adresse, Preis, Kontakt etc.) aus Fließtext-Spalten. Direkte Mappings haben Vorrang vor LLM-extrahierten Werten |
 | **Telefonnormalisierung** | Deutsche Telefonnummern werden beim Import automatisch in das Format `+49 VORWAHL NUMMER` konvertiert (0681/12345 → +49 681 12345) |
 | **Ortsnamen-Auflösung** | Regionale Kfz-Kürzel (SB, SLS, HOM, NK, MZG, WND, IGB) werden automatisch zu vollen Stadtnamen aufgelöst |
-| **Einstellungen** | Globale Einstellungen (KI-Mapping Default) + Versionsanzeige im Header |
+| **Einstellungen** | Globale Einstellungen (KI-Mapping Default, Import-Profile verwalten) + Versionsanzeige im Header |
 | **URL-basierte Filter** | Alle Filterparameter in der URL — bookmarkbar, teilbar |
 
 ---
@@ -225,7 +227,7 @@ bun run build         # Baut das Frontend nach client/dist/
 
 ## Tests
 
-ImmoShark hat eine umfassende Test-Suite mit 128 automatisierten Tests. Alle Tests laufen mit `bun test` (Built-in, zero-config, keine extra Dependencies).
+ImmoShark hat eine umfassende Test-Suite mit 137 automatisierten Tests. Alle Tests laufen mit `bun test` (Built-in, zero-config, keine extra Dependencies).
 
 ```bash
 bun test              # Alle Tests (~150ms)
@@ -241,12 +243,13 @@ bun test:smoke        # Nur Smoke-Tests (Migration, Health)
 | Smoke | `server/src/__tests__/smoke/smoke.test.ts` | 4 | Migration, Idempotenz, FTS-Triggers, Health |
 | Unit | `shared/src/__tests__/validation.test.ts` | 21 | Zod-Schemas: Create, Update, Filter, CSV-Mapping |
 | Unit | `client/src/__tests__/utils.test.ts` | 15 | formatPreis, formatFlaeche, typLabel, statusLabel, statusColor |
+| Unit | `client/src/__tests__/settings.test.ts` | 9 | Profil-CRUD: getProfiles, saveProfile, deleteProfile, getDefaultProfile, Default-Invariante |
 | Unit | `server/src/__tests__/unit/csv-parsing.test.ts` | 22 | CSV-Parsing, dt. Zahlen/Datum, Validierungsfehler, Telefonnormalisierung, Ortsauflösung |
 | Unit | `server/src/__tests__/unit/mapping.test.ts` | 9 | LLM-Mapping + Freitext-Extraktion: valides Mapping, Batching, Fehlerbehandlung |
 | Unit | `server/src/__tests__/unit/immobilien-service.test.ts` | 21 | Alle 7 Service-Funktionen (CRUD, Filter, Stats) |
 | Integration | `server/src/__tests__/integration/api.test.ts` | 16 | HTTP CRUD, Filter, FTS-Suche, Stats-Endpoint |
 | Integration | `server/src/__tests__/integration/csv.test.ts` | 8 | Upload → Import Flow, Suggest-Mapping, Freitext-Mapping, Fehlerfälle |
-| | | **128** | |
+| | | **137** | |
 
 ### Teststrategie
 
@@ -454,8 +457,8 @@ immoshark/
 │       │                         Toast, RangeSlider
 │       ├── lib/
 │       ├── utils.ts              Formatierung (Preis, Fläche, Labels)
-│       └── settings.ts           localStorage-Helper für Einstellungen
-│       └── __tests__/            Client-Utility-Tests
+│       └── settings.ts           localStorage-Helper + Profil-CRUD
+│       └── __tests__/            Client-Tests (Utils, Settings/Profile-CRUD)
 ├── data/
 │   ├── beispiel-immobilien.csv   500 Beispiel-Immobilien (dt. CSV-Format)
 │   └── generate-csv.ts           Generator-Script für realistische Testdaten

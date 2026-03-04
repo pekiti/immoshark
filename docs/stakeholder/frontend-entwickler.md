@@ -18,8 +18,8 @@ client/
     │   ├── ImmobilienList.tsx Liste mit Filter + Sortierung
     │   ├── ImmobilieDetail.tsx Detailansicht
     │   ├── ImmobilieForm.tsx  Anlegen / Bearbeiten
-    │   ├── CsvImport.tsx     4-Schritt-Import-Wizard mit KI-Toggle
-    │   ├── Settings.tsx      Einstellungen (KI-Mapping Default)
+    │   ├── CsvImport.tsx     4-Schritt-Import-Wizard mit KI-Toggle + Profilen
+    │   ├── Settings.tsx      Einstellungen (KI-Mapping, Profilverwaltung)
     │   └── NotFound.tsx      404-Seite
     ├── components/
     │   ├── layout/           Sidebar, Header, Layout
@@ -28,7 +28,7 @@ client/
     │                         Toast, RangeSlider
     └── lib/
         ├── utils.ts          Formatierungs-Helfer
-        └── settings.ts       localStorage-Helper für Einstellungen
+        └── settings.ts       localStorage-Helper + Profil-CRUD (getProfiles, saveProfile, deleteProfile, getDefaultProfile)
 ```
 
 ---
@@ -141,6 +141,7 @@ Das `shared`-Paket liefert Types und Validierung für Frontend und Backend:
 | `CsvUploadResult` | Upload-Response (headers, preview, session_id) |
 | `CsvColumnMappingValue` | `keyof ImmobilieCreateDTO \| "__freitext__" \| null` |
 | `CsvColumnMapping` | `Record<string, CsvColumnMappingValue>` |
+| `CsvImportProfile` | `{ id, name, mapping, aiEnabled, isDefault, createdAt, updatedAt }` — Gespeichertes Import-Profil |
 | `CsvMappingSuggestion` | `{ mapping: CsvColumnMapping, source: "llm" \| "dictionary" }` |
 
 ### Enums
@@ -162,8 +163,8 @@ Das `shared`-Paket liefert Types und Validierung für Frontend und Backend:
 | `/immobilien/:id` | `ImmobilieDetail` | Detailansicht mit allen Feldern + Bilder |
 | `/immobilien/neu` | `ImmobilieForm` | Formular zum Anlegen |
 | `/immobilien/:id/bearbeiten` | `ImmobilieForm` | Formular zum Bearbeiten |
-| `/csv-import` | `CsvImport` | 4-Schritt-Import-Wizard mit KI-Toggle |
-| `/einstellungen` | `Settings` | Einstellungen (KI-Mapping Default) |
+| `/csv-import` | `CsvImport` | 4-Schritt-Import-Wizard mit KI-Toggle + Profilauswahl/-speicherung |
+| `/einstellungen` | `Settings` | Einstellungen (KI-Mapping Default, Import-Profile verwalten) |
 | `*` | `NotFound` | 404-Seite |
 
 ---

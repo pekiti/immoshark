@@ -1,6 +1,6 @@
 # ImmoShark — Benutzeranleitung
 
-Diese Anleitung beschreibt die Bedienung von ImmoShark aus Anwendersicht. Die Anwendung ist eine lokale Webanwendung zur Verwaltung von Immobiliendaten und wird im Browser unter `http://localhost:5173` aufgerufen.
+ImmoShark ist eine lokale Webanwendung zur Verwaltung von Immobiliendaten. Sie läuft vollständig auf Ihrem Rechner und wird im Browser unter `http://localhost:5173` aufgerufen.
 
 ---
 
@@ -19,27 +19,29 @@ Diese Anleitung beschreibt die Bedienung von ImmoShark aus Anwendersicht. Die An
 
 ## 1. Aufbau der Anwendung
 
-ImmoShark besteht aus vier Hauptbereichen, die Sie jederzeit über die **Sidebar** (linke Seitenleiste) erreichen:
+Alle Bereiche von ImmoShark erreichen Sie über die **Sidebar** (dunkle Seitenleiste links):
 
 | Bereich | Beschreibung |
 |---------|-------------|
-| **Dashboard** | Statistiken, Schnellsuche und zuletzt hinzugefügte Objekte |
-| **Immobilien** | Vollständige Liste aller Objekte mit Filtern und Sortierung |
+| **Dashboard** | Statistiken, Schnellsuche und die zuletzt hinzugefügten Objekte |
+| **Immobilien** | Liste aller Objekte mit Filtern, Sortierung und Volltextsuche |
 | **Neu anlegen** | Formular zum Erfassen einer neuen Immobilie |
-| **CSV Import** | Bestehende Daten aus CSV-Dateien importieren |
-| **Einstellungen** | KI-Mapping und andere Einstellungen verwalten |
+| **CSV Import** | Daten aus CSV-Dateien importieren (z. B. aus Excel) |
+| **Einstellungen** | KI-Zuordnung konfigurieren und Import-Profile verwalten |
+
+Oben rechts im Header sehen Sie die aktuelle Versionsnummer der Anwendung.
 
 ---
 
 ## 2. Dashboard
 
-Das Dashboard zeigt Ihnen auf einen Blick den aktuellen Stand Ihres Immobilienbestands.
+Das Dashboard verschafft Ihnen einen schnellen Überblick über den gesamten Immobilienbestand.
 
-![Dashboard-Ansicht](dashboard.png)
+![Dashboard mit Statistiken, Schnellsuche und zuletzt hinzugefügten Objekten](dashboard_view.png)
 
 ### Statistik-Karten
 
-Ganz oben sehen Sie vier farbige Karten:
+Die vier farbigen Karten am oberen Rand zeigen:
 
 - **Gesamt** (blau) — Gesamtanzahl aller erfassten Immobilien
 - **Verfügbar** (grün) — Objekte, die aktuell am Markt sind
@@ -48,11 +50,11 @@ Ganz oben sehen Sie vier farbige Karten:
 
 ### Schnellsuche
 
-Unterhalb der Statistiken befindet sich ein Suchfeld. Geben Sie einen Suchbegriff ein (z. B. einen Ort, eine Straße oder einen Kontaktnamen) und klicken Sie auf **Suchen**. Sie werden direkt zur gefilterten Immobilien-Liste weitergeleitet.
+Unterhalb der Statistiken befindet sich ein Suchfeld. Geben Sie einen Begriff ein — z. B. einen Ort, eine Straße oder einen Kontaktnamen — und klicken Sie auf **Suchen**. Sie gelangen direkt zur gefilterten Immobilien-Liste.
 
 ### Aufschlüsselung nach Typ
 
-Vier Karten zeigen die Anzahl der Objekte pro Typ: **Gewerbe**, **Grundstück**, **Haus** und **Wohnung**.
+Vier weitere Karten zeigen, wie sich der Bestand auf die Objekttypen verteilt: **Gewerbe**, **Grundstück**, **Haus** und **Wohnung**.
 
 ### Durchschnittspreis
 
@@ -60,7 +62,7 @@ Der berechnete Durchschnittspreis über alle Immobilien im Bestand.
 
 ### Zuletzt hinzugefügt
 
-Eine Liste der fünf zuletzt hinzugefügten Objekte mit Adresse, Typ, Preis und Status. Ein Klick auf ein Objekt führt Sie direkt zur Detailansicht.
+Die fünf zuletzt erfassten Objekte mit Adresse, Typ, Preis und Status. Ein Klick auf einen Eintrag öffnet die Detailansicht. Über den Button **Neu anlegen** (oben rechts) können Sie direkt eine neue Immobilie erfassen.
 
 ---
 
@@ -68,15 +70,15 @@ Eine Liste der fünf zuletzt hinzugefügten Objekte mit Adresse, Typ, Preis und 
 
 Die Immobilien-Liste ist das Herzstück der Anwendung. Hier finden, filtern und sortieren Sie Ihren gesamten Bestand.
 
-![Immobilien-Liste mit Filtern](immobilienansicht_liste.png)
+![Immobilien-Liste mit Filtern, Sortierung und Tabelle](immobilien_view.png)
 
 ### Filter verwenden
 
-Im oberen Bereich stehen Ihnen umfangreiche Filtermöglichkeiten zur Verfügung:
+Im oberen Bereich der Seite stehen umfangreiche Filtermöglichkeiten zur Verfügung:
 
 | Filter | Beschreibung |
 |--------|-------------|
-| **Suche (alle Felder)** | Volltextsuche über Adresse, Beschreibung, Kontakt, Notizen u. v. m. |
+| **Suche (alle Felder)** | Volltextsuche über Adresse, Beschreibung, Kontakt, Notizen und weitere Textfelder |
 | **Typ** | Wohnung, Haus, Grundstück oder Gewerbe |
 | **Status** | Verfügbar, Reserviert oder Verkauft |
 | **Ort** | Freitextsuche nach Ortsnamen |
@@ -85,96 +87,98 @@ Im oberen Bereich stehen Ihnen umfangreiche Filtermöglichkeiten zur Verfügung:
 | **Zimmer min/max** | Schieberegler mit Direkteingabe (1 bis 15, in 0,5er-Schritten) |
 | **Hinzugefügt von/bis** | Datumsbereich, wann das Objekt im System erfasst wurde |
 
-**Wichtig:** Filter werden erst angewendet, wenn Sie auf den Button **Suchen** klicken oder die Eingabetaste drücken. Alternativ können Sie alle Filter mit **Zurücksetzen** auf die Standardwerte zurücksetzen.
+Filter werden erst angewendet, wenn Sie auf **Suchen** klicken oder die Eingabetaste drücken. Mit **Zurücksetzen** setzen Sie alle Filter auf die Standardwerte zurück.
 
 ### Schieberegler bedienen
 
-Die Schieberegler für Preis, Fläche und Zimmer können Sie auf zwei Arten nutzen:
+Die Regler für Preis, Fläche und Zimmer lassen sich auf zwei Arten nutzen:
 
 1. **Schieben** — Ziehen Sie den Regler mit der Maus auf den gewünschten Wert
-2. **Direkte Eingabe** — Klicken Sie auf das Zahlenfeld rechts neben dem Regler und tippen Sie den gewünschten Wert ein
+2. **Direkte Eingabe** — Klicken Sie auf das Zahlenfeld neben dem Regler und tippen Sie den Wert ein
 
 ### Sortieren
 
-Klicken Sie auf eine **Spaltenüberschrift** in der Tabelle, um nach dieser Spalte zu sortieren:
+Klicken Sie auf eine **Spaltenüberschrift**, um die Tabelle zu sortieren:
 
-- Erster Klick: aufsteigend sortieren
-- Zweiter Klick: absteigend sortieren
-- Dritter Klick: Sortierung aufheben
+- 1. Klick: aufsteigend
+- 2. Klick: absteigend
+- 3. Klick: Sortierung aufheben
 
 Sortierbare Spalten: Objekt, Typ, Ort, Preis, Fläche, Zimmer, Status, Hinzugefügt am.
 
 ### Nach Kontakt gruppieren
 
-Mit dem Button **Nach Kontakt gruppieren** werden die Immobilien nach dem zugeordneten Ansprechpartner gruppiert. So sehen Sie auf einen Blick, welche Objekte zu welchem Kontakt gehören.
+Der Button **Nach Kontakt gruppieren** ordnet die Immobilien nach dem zugeordneten Ansprechpartner. So erkennen Sie auf einen Blick, welche Objekte zu welchem Kontakt gehören.
 
 ### Seitennavigation
 
-Am unteren Rand der Tabelle können Sie zwischen den Seiten blättern. Pro Seite werden 20 Objekte angezeigt.
+Am unteren Rand der Tabelle blättern Sie zwischen den Seiten. Pro Seite werden 20 Objekte angezeigt. Über den Button **Neu anlegen** (oben rechts) legen Sie direkt ein neues Objekt an.
 
 ### Objekt öffnen
 
-Klicken Sie auf den **Objektnamen** (Straße + Hausnummer) in der Tabelle, um zur Detailansicht zu gelangen.
+Ein Klick auf den **Objektnamen** (Straße + Hausnummer) in der Tabelle öffnet die Detailansicht.
 
 ---
 
 ## 4. Detailansicht
 
-Die Detailansicht zeigt alle Informationen zu einer einzelnen Immobilie.
+Die Detailansicht zeigt alle gespeicherten Informationen zu einer Immobilie auf einen Blick.
 
-![Detailansicht einer Immobilie](immobilenansicht_details.png)
+![Detailansicht mit Status, Beschreibung, Notizen und allen Objektdaten](immobile_einzelansicht_view.png)
 
-### Angezeigte Informationen
+### Aufbau
 
-- **Status und Preis** — Farbiger Status-Badge und Preis prominent oben
+- **Status und Preis** — Der farbige Status-Badge (z. B. „Verkauft") und der Preis stehen prominent oben
 - **Beschreibung** — Freitext-Beschreibung des Objekts
 - **Notizen** — Interne Notizen (gelb hinterlegt), nur für Sie sichtbar
-- **Details** — Adresse, Typ, Wohnfläche, Grundstücksfläche, Zimmer, Baujahr, Provision, Energieausweis, Exposé-Nummer, Veröffentlichungsdatum und Kontaktdaten
+- **Details-Raster** — Adresse, Typ, Preis, Wohnfläche, Grundstücksfläche, Zimmer, Baujahr, Provision, Energieausweis, Exposé-Nummer, Veröffentlichungsdatum und Kontaktdaten
+
+Über den Link **Zurück zur Liste** oben links kehren Sie zur Immobilien-Liste zurück.
 
 ### Aktionen
 
 Oben rechts stehen zwei Buttons:
 
-- **Bearbeiten** — Öffnet das Formular zum Bearbeiten der Immobilie
-- **Löschen** — Löscht die Immobilie (nach Sicherheitsabfrage)
+- **Bearbeiten** — Öffnet das Formular mit den vorausgefüllten Daten
+- **Löschen** (rot) — Löscht die Immobilie unwiderruflich (nach Sicherheitsabfrage)
 
 ---
 
 ## 5. Immobilie anlegen / bearbeiten
 
-Über **Neu anlegen** in der Sidebar oder den Button **Neu anlegen** auf dem Dashboard erreichen Sie das Formular zur Erfassung einer neuen Immobilie. Das gleiche Formular wird auch beim Bearbeiten verwendet.
+Über **Neu anlegen** in der Sidebar, den Button **Neu anlegen** auf dem Dashboard oder in der Immobilien-Liste gelangen Sie zum Erfassungsformular. Beim Bearbeiten eines bestehenden Objekts wird dasselbe Formular mit vorausgefüllten Daten angezeigt.
 
-![Formular zum Anlegen einer Immobilie](immobilie_anlegen.png)
+![Formular mit allen Abschnitten: Adresse, Objektdaten, Weitere Angaben, Notizen und Kontakt](neu_anlegen_view.png)
 
 ### Pflichtfelder
 
 Folgende Felder müssen ausgefüllt werden:
 
 - **Straße** und **Hausnummer**
-- **PLZ** (5 Ziffern)
+- **PLZ** (genau 5 Ziffern)
 - **Ort**
 - **Typ** (Wohnung, Haus, Grundstück oder Gewerbe)
 
 ### Optionale Felder
 
+Das Formular ist in vier Abschnitte gegliedert:
+
 | Abschnitt | Felder |
 |-----------|--------|
-| **Objektdaten** | Status, Preis, Wohnfläche, Grundstücksfläche, Zimmeranzahl, Baujahr, Beschreibung |
-| **Weitere Angaben** | Provision, Energieausweis-Klasse (A+ bis H), Energieverbrauch, Exposé-Nummer, Veröffentlicht am |
+| **Objektdaten** | Status, Preis, Wohnfläche (m²), Grundstücksfläche (m²), Zimmeranzahl, Baujahr, Beschreibung |
+| **Weitere Angaben** | Provision, Energieausweis-Klasse (A+ bis H), Energieverbrauch (kWh/m²a), Exposé-Nummer, Veröffentlicht am |
 | **Notizen** | Internes Freitextfeld (max. 500 Zeichen) mit Zeichenzähler |
 | **Kontakt** | Name, Telefon, E-Mail des Ansprechpartners |
 
 ### Speichern
 
-Klicken Sie auf **Anlegen** (neues Objekt) bzw. **Speichern** (bestehendes Objekt), um die Daten zu sichern. Sie werden anschließend automatisch zur Detailansicht weitergeleitet.
+Klicken Sie auf **Anlegen** (neues Objekt) bzw. **Speichern** (bestehendes Objekt). Sie werden anschließend automatisch zur Detailansicht weitergeleitet. Mit **Abbrechen** verwerfen Sie Ihre Eingaben.
 
 ---
 
 ## 6. CSV-Import
 
-Der CSV-Import ermöglicht Ihnen, große Datenmengen aus Tabellenkalkulationen (Excel, Google Sheets, etc.) in ImmoShark zu übernehmen.
-
-![CSV-Import mit Spalten-Zuordnung](csv_import.png)
+Der CSV-Import übernimmt Daten aus Tabellenkalkulationen (Excel, Google Sheets, LibreOffice Calc) in ImmoShark. Ein Assistent führt Sie in vier Schritten durch den Vorgang.
 
 ### Schritt 1: Datei hochladen
 
@@ -185,50 +189,83 @@ Der CSV-Import ermöglicht Ihnen, große Datenmengen aus Tabellenkalkulationen (
 
 ### Schritt 2: Spalten zuordnen
 
-Nach dem Hochladen werden die Spalten Ihrer CSV-Datei angezeigt. ImmoShark versucht automatisch, die Spalten den passenden Feldern zuzuordnen (z. B. "Straße" wird "Straße" zugeordnet).
+![Zuordnungs-Schritt mit Profil-Leiste, KI-Toggle und Spalten-Mapping](csv_import_zuordnung_view.png)
 
-**KI-Zuordnung:** Wenn die KI-Zuordnung aktiviert ist (Toggle oben rechts), analysiert eine KI (GPT-5) die Spaltenüberschriften und Beispieldaten und schlägt ein intelligenteres Mapping vor. Während die KI arbeitet, erscheint der Hinweis "KI analysiert Spalten...". Sie können die KI-Zuordnung jederzeit per Toggle deaktivieren — dann wird nur die wörterbuchbasierte Erkennung verwendet.
+Nach dem Hochladen zeigt ImmoShark alle Spalten der CSV-Datei an. Jede Spalte kann einem Datenbankfeld zugeordnet werden (z. B. „Straße" → Straße, „PLZ" → PLZ). ImmoShark versucht, passende Felder automatisch zu erkennen.
 
-- Prüfen Sie die automatische Zuordnung (mit oder ohne KI)
-- Passen Sie die Zuordnung bei Bedarf über die Dropdown-Menüs an
-- Nicht benötigte Spalten können Sie auf "Nicht zuordnen" belassen
-- **Freitext-Extraktion (KI):** Wenn eine Spalte Fließtext enthält (z. B. eine Spalte mit Immobilienbeschreibungen), wählen Sie "Freitext-Extraktion (KI)". GPT-5 extrahiert dann automatisch Adresse, Preis, Kontaktdaten etc. aus dem Text
+#### Import-Profile
+
+Oben im Zuordnungs-Schritt befindet sich die **Profil-Leiste**. Wenn Sie ein bestimmtes CSV-Format regelmäßig importieren, sparen Profile erheblich Zeit:
+
+- **Profil laden:** Wählen Sie ein gespeichertes Profil aus dem Dropdown. Die Spalten-Zuordnung und KI-Einstellung werden sofort übernommen. Spalten, die in der aktuellen CSV nicht vorkommen, werden ignoriert; neue Spalten bleiben auf „Nicht importieren".
+- **Profil speichern:** Klicken Sie auf **Speichern**. Im Dialog können Sie ein neues Profil anlegen (mit Name) oder ein bestehendes überschreiben. Optional setzen Sie das Profil als **Standard** — es wird dann bei jedem zukünftigen Upload automatisch angewendet.
+- **Standard-Profil:** Wenn ein Standard-Profil gesetzt ist, wird es direkt nach dem Hochladen angewendet, ohne dass Sie es manuell auswählen müssen.
+
+#### KI-Zuordnung
+
+Wenn die **KI-Zuordnung** aktiviert ist (Toggle rechts), analysiert GPT-5 die Spaltenüberschriften und Beispieldaten und schlägt eine intelligente Zuordnung vor. Während die KI arbeitet, erscheint der Hinweis „KI analysiert Spalten...". Sie können die KI jederzeit per Toggle deaktivieren — dann greift nur die wörterbuchbasierte Erkennung.
+
+#### Zuordnung anpassen
+
+- Prüfen Sie die automatische Zuordnung und passen Sie sie bei Bedarf über die Dropdown-Menüs an
+- Nicht benötigte Spalten belassen Sie auf „Nicht importieren"
+- **Freitext-Extraktion (KI):** Enthält eine Spalte Fließtext (z. B. eine Beschreibung mit Adresse, Preis und Kontakt in einem Feld), wählen Sie „Freitext-Extraktion (KI)". GPT-5 extrahiert dann automatisch die relevanten Daten
 - Klicken Sie auf **Weiter zur Vorschau**
 
 ### Schritt 3: Vorschau prüfen
 
-Sie sehen eine Vorschau der ersten Zeilen mit der gewählten Zuordnung. Prüfen Sie, ob die Daten korrekt zugeordnet sind.
+![Vorschau der ersten 5 Zeilen mit zugeordneten Spalten](csv_import_vorschau_view.png)
 
-### Schritt 4: Import starten
+Sie sehen die ersten fünf Zeilen Ihrer CSV-Datei mit der gewählten Zuordnung. Jede Spaltenüberschrift zeigt an, welchem Datenbankfeld sie zugeordnet ist (z. B. „Straße → strasse"). Prüfen Sie, ob die Daten korrekt zugeordnet sind. Mit **Zurück** können Sie die Zuordnung noch anpassen.
 
-- Klicken Sie auf **Import starten**
-- Nach dem Import sehen Sie eine Zusammenfassung: wie viele Zeilen importiert und wie viele übersprungen wurden
-- Übersprungene Zeilen werden mit einer Fehlermeldung aufgelistet (z. B. fehlende Pflichtfelder)
+Klicken Sie auf **[Anzahl] Zeilen importieren**, um den Import zu starten.
 
-### Tipps zum CSV-Import
+### Schritt 4: Ergebnis
 
-- **Pflichtfelder beachten:** Jede Zeile braucht mindestens Straße, Hausnummer, PLZ, Ort und Typ
-- **Typ-Werte:** Verwenden Sie `wohnung`, `haus`, `grundstueck` oder `gewerbe`
-- **Status-Werte:** Verwenden Sie `verfuegbar`, `reserviert` oder `verkauft`
-- **Datumswerte:** Datumsangaben (z. B. "Veröffentlicht am") können im deutschen Format `TT.MM.JJJJ` oder ISO-Format `JJJJ-MM-TT` eingegeben werden
-- **Leere Felder:** Optionale Felder dürfen leer gelassen werden
-- **Telefonnummern:** Werden automatisch in das Format `+49 VORWAHL NUMMER` normalisiert (z. B. `0681/12345` → `+49 681 12345`)
-- **Ortskürzel:** Regionale Kfz-Kürzel wie SB, SLS oder HOM werden automatisch zu den vollen Stadtnamen (Saarbrücken, Saarlouis, Homburg) aufgelöst
-- **Freitext-Spalten:** Wenn alle Informationen in einer Fließtext-Spalte stehen, wählen Sie "Freitext-Extraktion (KI)" — GPT-5 extrahiert die relevanten Daten automatisch
+Nach dem Import zeigt ImmoShark eine Zusammenfassung:
+
+- **Importiert** — Anzahl der erfolgreich übernommenen Zeilen
+- **Übersprungen** — Zeilen, die nicht importiert werden konnten (z. B. wegen fehlender Pflichtfelder)
+
+Falls Zeilen übersprungen wurden, listet ImmoShark die jeweiligen Fehlermeldungen auf. Von hier aus können Sie eine **weitere Datei importieren** oder direkt **zur Immobilien-Übersicht** wechseln.
+
+### Hinweise zum CSV-Import
+
+| Thema | Details |
+|-------|---------|
+| **Pflichtfelder** | Jede Zeile braucht mindestens Straße, Hausnummer, PLZ, Ort und Typ |
+| **Typ-Werte** | `wohnung`, `haus`, `grundstueck` oder `gewerbe` |
+| **Status-Werte** | `verfuegbar`, `reserviert` oder `verkauft` |
+| **Datumsformat** | Deutsches Format `TT.MM.JJJJ` oder ISO `JJJJ-MM-TT` |
+| **Leere Felder** | Optionale Felder dürfen leer bleiben |
+| **Telefonnummern** | Werden automatisch normalisiert (z. B. `0681/12345` → `+49 681 12345`) |
+| **Ortskürzel** | Kfz-Kürzel wie SB, SLS, HOM werden zu vollen Stadtnamen aufgelöst |
+| **Freitext** | „Freitext-Extraktion (KI)" extrahiert strukturierte Daten aus Fließtext-Spalten |
 
 ---
 
 ## 7. Einstellungen
 
-Über **Einstellungen** in der Sidebar können Sie globale Optionen für ImmoShark konfigurieren.
+Unter **Einstellungen** in der Sidebar konfigurieren Sie globale Optionen.
+
+![Einstellungen mit KI-Toggle und Import-Profile](einstellungen_view.png)
 
 ### KI-gestützte Spalten-Zuordnung
 
-Ein Toggle, mit dem Sie die KI-basierte Spalten-Zuordnung beim CSV-Import standardmäßig aktivieren oder deaktivieren können. Diese Einstellung wird lokal gespeichert und gilt als Default für jeden neuen Import. Im Import-Schritt selbst können Sie die KI-Zuordnung pro Datei noch überschreiben.
+Der Toggle steuert, ob die KI-basierte Spalten-Zuordnung beim CSV-Import standardmäßig aktiviert ist. Diese Einstellung wird lokal gespeichert und gilt als Vorgabe für jeden neuen Import. Im Import-Schritt selbst können Sie die KI pro Datei noch ein- oder ausschalten.
 
-### Versionsanzeige
+### Import-Profile
 
-Im Header der Anwendung (oben rechts) wird die aktuelle Version von ImmoShark angezeigt.
+Unterhalb des KI-Toggles sehen Sie alle gespeicherten Import-Profile. Jedes Profil zeigt Name, Erstelldatum, die Anzahl gespeicherter Spalten-Zuordnungen und den KI-Status (an/aus). Ein Standard-Profil ist zusätzlich mit einem Badge gekennzeichnet.
+
+**Aktionen:**
+
+- **Als Standard** — Setzt das Profil als Standard-Profil. Es wird beim nächsten CSV-Upload automatisch angewendet. Ein erneuter Klick entfernt den Standard-Status.
+- **Löschen** — Entfernt das Profil (nach Bestätigung).
+
+Wenn noch keine Profile angelegt wurden, erscheint der Hinweis „Keine Profile vorhanden". Profile erstellen Sie im Zuordnungs-Schritt des CSV-Imports (siehe [Schritt 2](#schritt-2-spalten-zuordnen)).
+
+> Profile werden lokal im Browser gespeichert und stehen nur auf dem aktuellen Gerät zur Verfügung.
 
 ---
 
@@ -236,7 +273,7 @@ Im Header der Anwendung (oben rechts) wird die aktuelle Version von ImmoShark an
 
 ### Tastenkürzel
 
-- **Enter** — In der Filterleiste: Suche auslösen (statt auf "Suchen" zu klicken)
+- **Enter** — In der Filterleiste: Suche auslösen (statt auf „Suchen" zu klicken)
 
 ### URL-basierte Filter
 
@@ -247,4 +284,4 @@ Alle aktiven Filter werden in der Browser-Adressleiste gespeichert. Das bedeutet
 
 ### Daten sichern
 
-ImmoShark speichert alle Daten lokal in einer SQLite-Datenbank (`server/immoshark.db`). Sichern Sie diese Datei regelmäßig, um Datenverlust zu vermeiden.
+ImmoShark speichert alle Daten lokal in einer SQLite-Datenbank (`data/immoshark.db`). Sichern Sie diese Datei regelmäßig, um Datenverlust zu vermeiden.
