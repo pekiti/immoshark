@@ -10,10 +10,10 @@ ImmoShark ist eine lokale Webanwendung zur Verwaltung von Immobiliendaten. Sie w
 
 | Eigenschaft | Wert |
 |---|---|
-| Version | 0.1.0 |
+| Version | 0.2.0 |
 | Lizenz | MIT |
-| Produktionsbereit | MVP-Stand — Features vollständig, Deployment-Optimierung offen |
-| Testabdeckung | 105 automatisierte Tests (Unit, Integration, Smoke) |
+| Produktionsbereit | MVP-Stand — Features vollständig, KI-Mapping ergänzt, Deployment-Optimierung offen |
+| Testabdeckung | 111 automatisierte Tests (Unit, Integration, Smoke) |
 
 ---
 
@@ -30,7 +30,7 @@ Immobilienmakler und kleine Hausverwaltungen, die:
 
 | Funktion | Nutzen |
 |---|---|
-| **CSV-Import** | Bestehende Datenbestände aus Excel/Calc ohne Neueingabe übernehmen |
+| **CSV-Import mit KI-Mapping** | Bestehende Datenbestände aus Excel/Calc ohne Neueingabe übernehmen. GPT-5 erkennt unbekannte Spaltenformate automatisch (optional, abschaltbar) |
 | **Volltextsuche** | Über alle 13 Textfelder hinweg sofort finden — Adressen, Kontakte, Notizen |
 | **Dashboard** | Bestandsübersicht auf einen Blick — Statistiken, letzte Objekte, Schnellsuche |
 | **Filter + Sortierung** | Bestand nach Typ, Status, Preis, Fläche, Zimmer, Datum eingrenzen |
@@ -78,6 +78,7 @@ Die gesamte Datenbank liegt in einer einzigen Datei. Backup = Datei kopieren. Ke
 |---|---|---|
 | MVP | CRUD, CSV-Import, Suche, Dashboard, Filter | Abgeschlossen |
 | Qualität | Automatisierte Tests (Unit, Integration, Smoke) | Abgeschlossen |
+| KI-Integration | GPT-5-basiertes Spalten-Mapping, Einstellungen, Versionierung | Abgeschlossen (v0.2.0) |
 | Stabilität | Deployment-Dokumentation, Monitoring | Offen |
 | Erweiterung | Exposé-PDF-Export, Bilderhandlung, Multi-User | Geplant |
 

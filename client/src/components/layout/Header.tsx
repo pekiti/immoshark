@@ -1,3 +1,5 @@
+declare const __APP_VERSION__: string;
+
 interface HeaderProps {
   onMenuClick: () => void;
 }
@@ -14,6 +16,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         </svg>
       </button>
       <div className="flex-1" />
+      <span className="text-xs text-gray-400">v{__APP_VERSION__}</span>
       <span className="text-sm text-gray-500">Immobilienverwaltung</span>
     </header>
   );

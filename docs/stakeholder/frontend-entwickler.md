@@ -18,14 +18,17 @@ client/
     │   ├── ImmobilienList.tsx Liste mit Filter + Sortierung
     │   ├── ImmobilieDetail.tsx Detailansicht
     │   ├── ImmobilieForm.tsx  Anlegen / Bearbeiten
-    │   ├── CsvImport.tsx     4-Schritt-Import-Wizard
+    │   ├── CsvImport.tsx     4-Schritt-Import-Wizard mit KI-Toggle
+    │   ├── Settings.tsx      Einstellungen (KI-Mapping Default)
     │   └── NotFound.tsx      404-Seite
     ├── components/
     │   ├── layout/           Sidebar, Header, Layout
     │   ├── immobilien/       Table, FilterBar, StatusBadge
     │   └── ui/               Button, Input, Select, Modal, Pagination,
     │                         Toast, RangeSlider
-    └── lib/utils.ts          Formatierungs-Helfer
+    └── lib/
+        ├── utils.ts          Formatierungs-Helfer
+        └── settings.ts       localStorage-Helper für Einstellungen
 ```
 
 ---
@@ -76,6 +79,7 @@ Zentraler Fetch-Wrapper, der alle Endpunkte typisiert kapselt:
 | `api.delete(id)` | `DELETE /api/immobilien/:id` | `void` |
 | `api.stats()` | `GET /api/stats` | `ApiResponse<DashboardStats>` |
 | `api.uploadCsv(file)` | `POST /api/csv/upload` | Upload-Ergebnis mit `session_id` |
+| `api.suggestMapping(sessionId)` | `POST /api/csv/suggest-mapping` | KI-Mapping-Vorschlag (`CsvMappingSuggestion`) |
 | `api.importCsv(sessionId, mapping)` | `POST /api/csv/import` | Import-Ergebnis |
 
 ---
@@ -136,6 +140,7 @@ Das `shared`-Paket liefert Types und Validierung für Frontend und Backend:
 | `DashboardStats` | Stats-Payload (gesamt, verfuegbar, ..., nach_typ) |
 | `CsvUploadResult` | Upload-Response (headers, preview, session_id) |
 | `CsvColumnMapping` | `Record<string, TargetField \| null>` |
+| `CsvMappingSuggestion` | `{ mapping: CsvColumnMapping, source: "llm" \| "dictionary" }` |
 
 ### Enums
 
@@ -156,7 +161,8 @@ Das `shared`-Paket liefert Types und Validierung für Frontend und Backend:
 | `/immobilien/:id` | `ImmobilieDetail` | Detailansicht mit allen Feldern + Bilder |
 | `/immobilien/neu` | `ImmobilieForm` | Formular zum Anlegen |
 | `/immobilien/:id/bearbeiten` | `ImmobilieForm` | Formular zum Bearbeiten |
-| `/csv-import` | `CsvImport` | 4-Schritt-Import-Wizard |
+| `/csv-import` | `CsvImport` | 4-Schritt-Import-Wizard mit KI-Toggle |
+| `/einstellungen` | `Settings` | Einstellungen (KI-Mapping Default) |
 | `*` | `NotFound` | 404-Seite |
 
 ---
@@ -167,7 +173,7 @@ Das `shared`-Paket liefert Types und Validierung für Frontend und Backend:
 
 - **`Layout`** — Wrapper mit Sidebar + Header + Content-Bereich
 - **`Sidebar`** — Navigation zu allen Hauptbereichen
-- **`Header`** — Seitentitel
+- **`Header`** — Seitentitel + Versionsanzeige
 
 ### Immobilien-spezifisch
 

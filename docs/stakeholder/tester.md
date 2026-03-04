@@ -69,6 +69,18 @@ Formatierungs- und Label-Funktionen für die UI.
 | `statusLabel` | 4 | Alle 3 Status + Fallback |
 | `statusColor` | 4 | CSS-Klassen pro Status + Fallback |
 
+### Unit-Tests: Mapping-Service (`server/src/__tests__/unit/mapping.test.ts`)
+
+LLM-basierter Mapping-Service mit Dependency Injection (Mock-LLM, kein OpenAI-Aufruf).
+
+| Bereich | Tests | Prüft |
+|---|---|---|
+| Valides Mapping | 1 | LLM-Antwort wird korrekt geparsed und validiert |
+| Null-Werte | 1 | Nicht-gemappte Spalten bleiben `null` |
+| Ungültiges JSON | 1 | Gibt `null` zurück bei nicht-parsbarer LLM-Antwort |
+| Ungültige Felder | 1 | Gibt `null` zurück bei ungültigen Zielfeld-Namen |
+| LLM-Fehler | 1 | Wirft bei API-Fehler korrekt weiter |
+
 ### Unit-Tests: CSV-Parsing (`server/src/__tests__/unit/csv-parsing.test.ts`)
 
 CSV-Import-Pipeline: Parsing, deutsche Formate, Fehlerfälle.
@@ -112,6 +124,7 @@ Upload → Import Flow über HTTP inkl. Fehlerfälle.
 | Bereich | Tests | Prüft |
 |---|---|---|
 | Upload | 2 | Headers + Preview + session_id, fehlendes File → 400 |
+| Suggest-Mapping | 1 | Ungültige Session → 400 |
 | Import | 4 | Mapping-Import, ungültige Session, fehlende Session, ungültiges Mapping |
 
 ---
@@ -141,10 +154,19 @@ Ergänzend zu den automatisierten Tests — für explorative QA:
 
 1. `data/beispiel-immobilien.csv` oder eigene CSV vorbereiten
 2. Unter `CSV Import` hochladen
-3. Spalten-Mapping prüfen (Auto-Erkennung sollte greifen)
-4. Vorschau kontrollieren (5 Zeilen)
-5. Importieren → Meldung mit importiert/übersprungen/Fehler prüfen
-6. In der Immobilien-Liste die importierten Datensätze verifizieren
+3. Spalten-Mapping prüfen (Dictionary-Auto-Erkennung sollte sofort greifen)
+4. Wenn KI-Toggle aktiviert: "KI analysiert Spalten..." Spinner prüfen → Mapping wird nach kurzer Ladezeit aktualisiert
+5. KI-Toggle aus-/einschalten → Mapping-Wechsel zwischen Dictionary und KI testen
+6. Vorschau kontrollieren (5 Zeilen)
+7. Importieren → Meldung mit importiert/übersprungen/Fehler prüfen
+8. In der Immobilien-Liste die importierten Datensätze verifizieren
+
+### Einstellungen-Seite
+
+1. Unter `Einstellungen` navigieren
+2. KI-Toggle prüfen (Default: aktiviert)
+3. Toggle umschalten → Seite neu laden → Einstellung muss erhalten bleiben (localStorage)
+4. CSV-Import starten → KI-Toggle im Mapping-Schritt sollte dem Settings-Default entsprechen
 
 ### Volltextsuche
 
@@ -167,3 +189,5 @@ Ergänzend zu den automatisierten Tests — für explorative QA:
 | Notizen mit 501 Zeichen | Validierungsfehler |
 | Objekt löschen, dann per ID aufrufen | 404 |
 | Gleiche Exposé-Nummer doppelt anlegen | Unique-Constraint-Fehler |
+| CSV mit KI-Toggle importieren (ohne API Key) | Fallback auf Dictionary-Mapping, kein Fehler sichtbar |
+| KI-Toggle in Settings ändern + neuen Import starten | Import übernimmt neuen Default |

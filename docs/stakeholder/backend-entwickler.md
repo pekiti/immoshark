@@ -12,10 +12,11 @@ server/src/
 │   └── seed.ts               6 Beispiel-Immobilien
 ├── routes/
 │   ├── immobilien.ts         CRUD + Stats Endpoints
-│   └── csv.ts                Upload + Import (Multer + In-Memory-Session)
+│   └── csv.ts                Upload + Import + Suggest-Mapping (Multer + In-Memory-Session)
 ├── services/
 │   ├── immobilien.service.ts Queries: list, get, create, update, delete, stats, recent
-│   └── csv.service.ts        Parsing: Delimiter, dt. Zahlen/Datum, Validation, Import
+│   ├── csv.service.ts        Parsing: Delimiter, dt. Zahlen/Datum, Validation, Import
+│   └── mapping.service.ts    LLM-Spalten-Mapping via GPT-5 (DI-fähig)
 └── middleware/
     ├── validate.ts           Zod-Schema-Validierung (Body/Query)
     └── error.ts              Globaler Error-Handler (500 + Stack-Trace)
@@ -32,6 +33,7 @@ server/src/
 | Datenbank | SQLite via `bun:sqlite` | Eingebettet |
 | Validierung | Zod (via `@immoshark/shared`) | 3.24 |
 | CSV-Parsing | `csv-parse` | 5.6 |
+| KI-Mapping | `openai` (GPT-5) | 6.x |
 | File-Upload | Multer (Memory-Storage) | 1.4.5-lts |
 | CORS | `cors` | 2.8 |
 
@@ -107,6 +109,16 @@ Interne Hilfsfunktionen (nicht exportiert):
 - `parseGermanNumber`: `1.234,56` → `1234.56`
 - `parseGermanDate`: `15.01.2026` → `2026-01-15`
 
+### `mapping.service.ts`
+
+| Export | Zweck |
+|---|---|
+| `suggestMapping(headers, preview, callLLM?)` | LLM-basierte Spalten-Zuordnung — sendet CSV-Headers + Beispieldaten an GPT-5, validiert Antwort gegen `csvColumnMappingSchema` |
+| `createOpenAICaller()` | Erzeugt den Default-`LLMCaller` mit OpenAI SDK |
+| `LLMCaller` (Type) | `(systemPrompt, userPrompt) => Promise<string>` — injizierbarer Typ für Tests |
+
+**Architektur-Entscheidung:** Der `LLMCaller`-Typ entkoppelt den Service vom OpenAI-SDK. Tests injizieren einen einfachen Mock-Callback, der ein JSON-String zurückgibt — kein SDK-Mocking nötig.
+
 ---
 
 ## Routing
@@ -125,11 +137,12 @@ GET    /api/stats            → getStats
 ### `csv.ts`
 
 ```
-POST   /api/csv/upload       → multer.single("file") → parseCsvContent → session in Map
-POST   /api/csv/import       → session lookup → validate mapping → importCsvData
+POST   /api/csv/upload           → multer.single("file") → parseCsvContent → session in Map
+POST   /api/csv/suggest-mapping  → session lookup → suggestMapping (GPT-5) → validiertes Mapping
+POST   /api/csv/import           → session lookup → validate mapping → importCsvData
 ```
 
-CSV-Sessions werden in einer In-Memory `Map<string, string>` gespeichert und nach 10 Minuten automatisch gelöscht.
+CSV-Sessions werden in einer In-Memory `Map<string, string>` gespeichert und nach 10 Minuten automatisch gelöscht. Der `suggest-mapping`-Endpoint liest die Session, extrahiert Headers + Preview und übergibt sie dem Mapping-Service. Bei LLM-Fehler: HTTP 502 mit Code `LLM_ERROR`.
 
 ---
 

@@ -12,7 +12,8 @@ Diese Anleitung beschreibt die Bedienung von ImmoShark aus Anwendersicht. Die An
 4. [Detailansicht](#4-detailansicht)
 5. [Immobilie anlegen / bearbeiten](#5-immobilie-anlegen--bearbeiten)
 6. [CSV-Import](#6-csv-import)
-7. [Tipps und Hinweise](#7-tipps-und-hinweise)
+7. [Einstellungen](#7-einstellungen)
+8. [Tipps und Hinweise](#8-tipps-und-hinweise)
 
 ---
 
@@ -26,6 +27,7 @@ ImmoShark besteht aus vier Hauptbereichen, die Sie jederzeit über die **Sidebar
 | **Immobilien** | Vollständige Liste aller Objekte mit Filtern und Sortierung |
 | **Neu anlegen** | Formular zum Erfassen einer neuen Immobilie |
 | **CSV Import** | Bestehende Daten aus CSV-Dateien importieren |
+| **Einstellungen** | KI-Mapping und andere Einstellungen verwalten |
 
 ---
 
@@ -185,7 +187,9 @@ Der CSV-Import ermöglicht Ihnen, große Datenmengen aus Tabellenkalkulationen (
 
 Nach dem Hochladen werden die Spalten Ihrer CSV-Datei angezeigt. ImmoShark versucht automatisch, die Spalten den passenden Feldern zuzuordnen (z. B. "Straße" wird "Straße" zugeordnet).
 
-- Prüfen Sie die automatische Zuordnung
+**KI-Zuordnung:** Wenn die KI-Zuordnung aktiviert ist (Toggle oben rechts), analysiert eine KI (GPT-5) die Spaltenüberschriften und Beispieldaten und schlägt ein intelligenteres Mapping vor. Während die KI arbeitet, erscheint der Hinweis "KI analysiert Spalten...". Sie können die KI-Zuordnung jederzeit per Toggle deaktivieren — dann wird nur die wörterbuchbasierte Erkennung verwendet.
+
+- Prüfen Sie die automatische Zuordnung (mit oder ohne KI)
 - Passen Sie die Zuordnung bei Bedarf über die Dropdown-Menüs an
 - Nicht benötigte Spalten können Sie auf "Nicht zuordnen" belassen
 - Klicken Sie auf **Weiter zur Vorschau**
@@ -210,7 +214,21 @@ Sie sehen eine Vorschau der ersten Zeilen mit der gewählten Zuordnung. Prüfen 
 
 ---
 
-## 7. Tipps und Hinweise
+## 7. Einstellungen
+
+Über **Einstellungen** in der Sidebar können Sie globale Optionen für ImmoShark konfigurieren.
+
+### KI-gestützte Spalten-Zuordnung
+
+Ein Toggle, mit dem Sie die KI-basierte Spalten-Zuordnung beim CSV-Import standardmäßig aktivieren oder deaktivieren können. Diese Einstellung wird lokal gespeichert und gilt als Default für jeden neuen Import. Im Import-Schritt selbst können Sie die KI-Zuordnung pro Datei noch überschreiben.
+
+### Versionsanzeige
+
+Im Header der Anwendung (oben rechts) wird die aktuelle Version von ImmoShark angezeigt.
+
+---
+
+## 8. Tipps und Hinweise
 
 ### Tastenkürzel
 

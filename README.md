@@ -1,13 +1,14 @@
 # ImmoShark
 
-[![Version](https://img.shields.io/badge/Version-0.1.0-blue)](https://github.com/pekiti/immoshark)
+[![Version](https://img.shields.io/badge/Version-0.2.0-blue)](https://github.com/pekiti/immoshark)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.3-F9F1E1?logo=bun&logoColor=black)](https://bun.sh/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)](https://expressjs.com/)
 [![SQLite](https://img.shields.io/badge/SQLite-WAL+FTS5-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-[![Tests](https://img.shields.io/badge/Tests-105_passing-brightgreen)](#tests)
+[![Tests](https://img.shields.io/badge/Tests-111_passing-brightgreen)](#tests)
+[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--5-412991?logo=openai&logoColor=white)](https://openai.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Lokale Webanwendung zur Verwaltung von Immobiliendaten. Importiere Objekte per CSV, durchsuche den Bestand mit Volltextsuche und pflege alle Daten per CRUD-Oberfläche — alles läuft lokal, ohne Cloud-Abhängigkeiten.
@@ -45,11 +46,12 @@ Lokale Webanwendung zur Verwaltung von Immobiliendaten. Importiere Objekte per C
 
 ImmoShark richtet sich an Immobilienmakler, die eine schlanke, lokale Lösung zum Verwalten ihres Bestands brauchen:
 
-- **CSV-Import** — Bestehende Daten aus Tabellenkalkulationen übernehmen (deutsche Formate: `;`-Trennzeichen, Dezimalkomma)
+- **CSV-Import mit KI-Mapping** — Bestehende Daten aus Tabellenkalkulationen übernehmen (deutsche Formate: `;`-Trennzeichen, Dezimalkomma). GPT-5 erkennt unbekannte Spaltenformate automatisch
 - **Volltextsuche** — Über alle Textfelder suchen (Adressen, Beschreibungen, Kontaktdaten, Notizen, Status u.v.m.)
 - **CRUD-Verwaltung** — Immobilien anlegen, bearbeiten, löschen mit Validierung
 - **Dashboard** — Bestand auf einen Blick: Statistiken, Schnellsuche, letzte Objekte
 - **Filterbare Liste** — Nach Typ, Status, Ort, Preis, Fläche, Zimmerzahl und Datum filtern
+- **Einstellungen** — KI-Mapping an/aus, Versionsinformation im Header
 
 ---
 
@@ -66,6 +68,8 @@ ImmoShark richtet sich an Immobilienmakler, die eine schlanke, lokale Lösung zu
 | **Kontakt-Gruppierung** | Objekte nach Ansprechpartner gruppiert anzeigen |
 | **Volltextsuche** | FTS5-Suche über 13 Textfelder + LIKE-Fallback für numerische Felder |
 | **CSV-Import** | 4-Schritt-Wizard: Upload → Spalten-Mapping (mit Auto-Erkennung) → Vorschau → Import. Erkennt dt. Datumsformat (TT.MM.JJJJ) |
+| **KI-Spalten-Mapping** | GPT-5 analysiert CSV-Headers und Beispieldaten, um unbekannte Spaltenformate automatisch den 21 Datenbankfeldern zuzuordnen. Per Toggle ein-/ausschaltbar |
+| **Einstellungen** | Globale Einstellungen (KI-Mapping Default) + Versionsanzeige im Header |
 | **URL-basierte Filter** | Alle Filterparameter in der URL — bookmarkbar, teilbar |
 
 ---
@@ -95,6 +99,8 @@ Vite Dev Proxy (:5173 → :3002)
 Express API (:3002)
     │  Zod-Validierung
     │  Service Layer (raw SQL)
+    ├──────────────────────▶ OpenAI API (GPT-5)
+    │                        CSV-Spalten-Mapping
     ▼
 SQLite (WAL-Modus, FTS5)
     └── data/immoshark.db
@@ -110,6 +116,7 @@ SQLite (WAL-Modus, FTS5)
 | Validierung | **Zod** | Shared zwischen Client und Server, Runtime-Validierung mit Typ-Inferenz |
 | Frontend | **React 19** + **Vite** | Schnelles HMR, modernes JSX-Transform |
 | Styling | **Tailwind CSS 4** | Utility-First, kein separates Config-File nötig (v4 Vite Plugin) |
+| KI-Mapping | **OpenAI GPT-5** | Intelligentes Spalten-Mapping beim CSV-Import (optional, abschaltbar) |
 | Tests | **bun test** | Built-in Test-Runner, zero-config, keine Extra-Dependencies |
 
 ### Designentscheidungen
@@ -122,6 +129,7 @@ SQLite (WAL-Modus, FTS5)
 - **Additive Migration** — Bestehende Datenbanken werden automatisch erweitert (ALTER TABLE, FTS-Index-Rebuild), ohne Datenverlust.
 - **Deutsches CSV-Format** — Automatische Erkennung von `;` vs. `,` Delimiter, Dezimalkomma-Konvertierung (`1.234,56` → `1234.56`) und deutsches Datumsformat (`TT.MM.JJJJ` → `YYYY-MM-DD`).
 - **Test-Seam per `setDb()`** — Minimaler Injection-Point, damit Tests eine In-Memory-DB nutzen können, ohne Service-Code zu ändern.
+- **LLM-Mapping mit Dependency Injection** — Der `LLMCaller`-Typ entkoppelt den Mapping-Service vom OpenAI-SDK. Tests injizieren einen Mock-Caller, Produktion nutzt GPT-5. Fallback auf Dictionary-Mapping bei KI-Fehler — kein harter Fehler für den User.
 
 ---
 
@@ -131,8 +139,11 @@ SQLite (WAL-Modus, FTS5)
 |------|---------|-------|-------------|
 | **Git** | >= 2.x | Versionskontrolle | [git-scm.com](https://git-scm.com/) oder `brew install git` |
 | **Bun** | >= 1.1 | Runtime, Paketmanager, SQLite | [bun.sh](https://bun.sh/) |
+| **OpenAI API Key** | — | KI-Spalten-Mapping (optional) | [platform.openai.com](https://platform.openai.com/) |
 
 Bun ersetzt Node.js, npm und einen separaten TypeScript-Compiler. Es bringt native SQLite-Bindings mit — dadurch entfällt eine separate SQLite-Installation.
+
+> **KI-Mapping:** Für das GPT-5-basierte Spalten-Mapping muss ein `OPENAI_API_KEY` in der `.env`-Datei hinterlegt sein. Ohne Key funktioniert das Dictionary-basierte Auto-Mapping weiterhin — das KI-Feature ist optional.
 
 > **Hinweis:** Vite und TypeScript werden als Projekt-Abhängigkeiten installiert (nicht global nötig). Docker wird für die Entwicklung nicht benötigt.
 
@@ -174,7 +185,7 @@ cd immoshark
 # 2. Abhängigkeiten installieren
 bun install
 
-# 3. Testdaten laden (6 Basis-Immobilien)
+# 3. Testdaten laden (500 Immobilien)
 bun run seed
 
 # Optional: 500 Testdaten generieren (erzeugt data/beispiel-immobilien.csv)
@@ -208,7 +219,7 @@ bun run build         # Baut das Frontend nach client/dist/
 
 ## Tests
 
-ImmoShark hat eine umfassende Test-Suite mit 105 automatisierten Tests. Alle Tests laufen mit `bun test` (Built-in, zero-config, keine extra Dependencies).
+ImmoShark hat eine umfassende Test-Suite mit 111 automatisierten Tests. Alle Tests laufen mit `bun test` (Built-in, zero-config, keine extra Dependencies).
 
 ```bash
 bun test              # Alle Tests (~150ms)
@@ -225,10 +236,11 @@ bun test:smoke        # Nur Smoke-Tests (Migration, Health)
 | Unit | `shared/src/__tests__/validation.test.ts` | 21 | Zod-Schemas: Create, Update, Filter, CSV-Mapping |
 | Unit | `client/src/__tests__/utils.test.ts` | 15 | formatPreis, formatFlaeche, typLabel, statusLabel, statusColor |
 | Unit | `server/src/__tests__/unit/csv-parsing.test.ts` | 10 | CSV-Parsing, dt. Zahlen/Datum, Validierungsfehler |
+| Unit | `server/src/__tests__/unit/mapping.test.ts` | 5 | LLM-Mapping-Service: valides Mapping, null-Werte, ungültiges JSON/Felder, Fehler |
 | Unit | `server/src/__tests__/unit/immobilien-service.test.ts` | 21 | Alle 7 Service-Funktionen (CRUD, Filter, Stats) |
 | Integration | `server/src/__tests__/integration/api.test.ts` | 16 | HTTP CRUD, Filter, FTS-Suche, Stats-Endpoint |
-| Integration | `server/src/__tests__/integration/csv.test.ts` | 6 | Upload → Import Flow, Fehlerfälle |
-| | | **105** | |
+| Integration | `server/src/__tests__/integration/csv.test.ts` | 7 | Upload → Import Flow, Suggest-Mapping, Fehlerfälle |
+| | | **111** | |
 
 ### Teststrategie
 
@@ -339,6 +351,7 @@ Virtueller FTS5-Index über 13 Text-Spalten der `immobilien`-Tabelle. Wird autom
 | `DELETE` | `/api/immobilien/:id` | Objekt löschen |
 | `GET` | `/api/stats` | Dashboard-Statistiken |
 | `POST` | `/api/csv/upload` | CSV hochladen (gibt Headers + Vorschau zurück) |
+| `POST` | `/api/csv/suggest-mapping` | KI-Spalten-Mapping via GPT-5 (optional) |
 | `POST` | `/api/csv/import` | CSV importieren mit Spalten-Mapping |
 
 ### Filter-Parameter für `GET /api/immobilien`
@@ -404,11 +417,12 @@ immoshark/
 │   │   └── seed.ts               6 Beispiel-Immobilien
 │   ├── routes/
 │   │   ├── immobilien.ts         CRUD + Stats Endpoints
-│   │   └── csv.ts                CSV Upload + Import
+│   │   └── csv.ts                CSV Upload + Import + Suggest-Mapping
 │   ├── services/
 │   │   ├── immobilien.service.ts Datenbank-Queries, Filter, Sortierung, FTS
-│   │   └── csv.service.ts        CSV-Parsing, Delimiter-Detection, Mapping,
-│   │                             dt. Zahlen-/Datumsformat-Konvertierung
+│   │   ├── csv.service.ts        CSV-Parsing, Delimiter-Detection, Mapping,
+│   │   │                         dt. Zahlen-/Datumsformat-Konvertierung
+│   │   └── mapping.service.ts    LLM-Mapping via GPT-5 (DI-fähig)
 │   ├── middleware/
 │   │   ├── error.ts              Globaler Error-Handler
 │   │   └── validate.ts           Zod-Validierungs-Middleware
@@ -425,13 +439,16 @@ immoshark/
 │       ├── App.tsx               Route-Definitionen
 │       ├── api/client.ts         Typisierter Fetch-Wrapper
 │       ├── hooks/                useImmobilien, useImmobilie
-│       ├── pages/                Dashboard, Liste, Detail, Form, CSV, 404
+│       ├── pages/                Dashboard, Liste, Detail, Form, CSV,
+    │                         Settings, 404
 │       ├── components/
 │       │   ├── layout/           Sidebar, Header, Layout
 │       │   ├── immobilien/       Table, FilterBar, StatusBadge
 │       │   └── ui/               Button, Input, Select, Modal, Pagination,
 │       │                         Toast, RangeSlider
-│       ├── lib/utils.ts          Formatierung (Preis, Fläche, Labels)
+│       ├── lib/
+    │   ├── utils.ts          Formatierung (Preis, Fläche, Labels)
+    │   └── settings.ts       localStorage-Helper für Einstellungen
 │       └── __tests__/            Client-Utility-Tests
 ├── data/
 │   ├── beispiel-immobilien.csv   500 Beispiel-Immobilien (dt. CSV-Format)

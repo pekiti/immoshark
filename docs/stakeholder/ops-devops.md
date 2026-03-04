@@ -80,7 +80,7 @@ Für Produktion: statische Dateien aus `client/dist/` über nginx oder Express-S
 | Variable | Default | Beschreibung |
 |---|---|---|
 | `PORT` | `3002` | API-Server Port |
-| — | — | Keine weitere Konfiguration nötig. DB-Pfad und Migrations sind fest codiert. |
+| `OPENAI_API_KEY` | — | OpenAI API Key für KI-Spalten-Mapping (optional). Ohne Key funktioniert das Dictionary-basierte Auto-Mapping weiterhin. |
 
 ### Datenbank-Pfad
 
