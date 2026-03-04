@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "bun:test";
-import { parseCsvContent, importCsvData } from "../../services/csv.service.js";
+import { parseCsvContent, importCsvData, normalizeGermanPhone, resolveCityAbbreviation } from "../../services/csv.service.js";
 import { createTestDb } from "../helpers.js";
 import type { Database } from "bun:sqlite";
 
@@ -51,7 +51,7 @@ describe("importCsvData — German numbers", () => {
     db = createTestDb();
   });
 
-  it("parses German number '1.234,56' → 1234.56 for preis", () => {
+  it("parses German number '1.234,56' → 1234.56 for preis", async () => {
     const csv = "Strasse;Nr;PLZ;Ort;Typ;Preis\nTeststr.;1;10115;Berlin;wohnung;1.234,56";
     const mapping = {
       Strasse: "strasse" as const,
@@ -62,14 +62,14 @@ describe("importCsvData — German numbers", () => {
       Preis: "preis" as const,
     };
 
-    const result = importCsvData(csv, mapping);
+    const result = await importCsvData(csv, mapping);
     expect(result.imported).toBe(1);
 
     const row = db.query("SELECT preis FROM immobilien WHERE strasse = 'Teststr.'").get() as { preis: number };
     expect(row.preis).toBeCloseTo(1234.56, 2);
   });
 
-  it("parses simple number '250000' for preis", () => {
+  it("parses simple number '250000' for preis", async () => {
     const csv = "Strasse;Nr;PLZ;Ort;Typ;Preis\nMusterstr.;5;10115;Berlin;wohnung;250000";
     const mapping = {
       Strasse: "strasse" as const,
@@ -80,7 +80,7 @@ describe("importCsvData — German numbers", () => {
       Preis: "preis" as const,
     };
 
-    const result = importCsvData(csv, mapping);
+    const result = await importCsvData(csv, mapping);
     expect(result.imported).toBe(1);
 
     const row = db.query("SELECT preis FROM immobilien WHERE strasse = 'Musterstr.'").get() as { preis: number };
@@ -95,7 +95,7 @@ describe("importCsvData — German dates", () => {
     db = createTestDb();
   });
 
-  it("parses German date '15.01.2026' → '2026-01-15'", () => {
+  it("parses German date '15.01.2026' → '2026-01-15'", async () => {
     const csv = "Strasse;Nr;PLZ;Ort;Typ;Datum\nDatestr.;1;10115;Berlin;wohnung;15.01.2026";
     const mapping = {
       Strasse: "strasse" as const,
@@ -106,14 +106,14 @@ describe("importCsvData — German dates", () => {
       Datum: "veroeffentlicht" as const,
     };
 
-    const result = importCsvData(csv, mapping);
+    const result = await importCsvData(csv, mapping);
     expect(result.imported).toBe(1);
 
     const row = db.query("SELECT veroeffentlicht FROM immobilien WHERE strasse = 'Datestr.'").get() as { veroeffentlicht: string };
     expect(row.veroeffentlicht).toBe("2026-01-15");
   });
 
-  it("passes through ISO date '2026-01-15' unchanged", () => {
+  it("passes through ISO date '2026-01-15' unchanged", async () => {
     const csv = "Strasse;Nr;PLZ;Ort;Typ;Datum\nISOstr.;2;10115;Berlin;haus;2026-01-15";
     const mapping = {
       Strasse: "strasse" as const,
@@ -124,7 +124,7 @@ describe("importCsvData — German dates", () => {
       Datum: "veroeffentlicht" as const,
     };
 
-    const result = importCsvData(csv, mapping);
+    const result = await importCsvData(csv, mapping);
     expect(result.imported).toBe(1);
 
     const row = db.query("SELECT veroeffentlicht FROM immobilien WHERE strasse = 'ISOstr.'").get() as { veroeffentlicht: string };
@@ -137,7 +137,7 @@ describe("importCsvData — validation errors", () => {
     createTestDb();
   });
 
-  it("skips rows with invalid data and reports errors", () => {
+  it("skips rows with invalid data and reports errors", async () => {
     const csv = "Strasse;Nr;PLZ;Ort;Typ\nGut;1;10115;Berlin;wohnung\n;;ABC;;\n";
     const mapping = {
       Strasse: "strasse" as const,
@@ -147,9 +147,64 @@ describe("importCsvData — validation errors", () => {
       Typ: "typ" as const,
     };
 
-    const result = importCsvData(csv, mapping);
+    const result = await importCsvData(csv, mapping);
     expect(result.imported).toBe(1);
     expect(result.skipped).toBe(1);
     expect(result.errors.length).toBeGreaterThan(0);
+  });
+});
+
+describe("normalizeGermanPhone", () => {
+  it("normalizes 0-prefix landline to +49 format", () => {
+    expect(normalizeGermanPhone("0681 12345")).toBe("+49 681 12345");
+  });
+
+  it("normalizes 0049-prefix to +49 format", () => {
+    expect(normalizeGermanPhone("0049 681 12345")).toBe("+49 681 12345");
+  });
+
+  it("keeps already-normalized +49 format", () => {
+    expect(normalizeGermanPhone("+49 681 12345")).toBe("+49 681 12345");
+  });
+
+  it("normalizes mobile numbers (0171)", () => {
+    const result = normalizeGermanPhone("0171-1234567");
+    expect(result).toBe("+49 171 1234567");
+  });
+
+  it("removes slashes, dashes, parentheses", () => {
+    expect(normalizeGermanPhone("(0681) 123-45")).toBe("+49 681 12345");
+  });
+
+  it("returns non-German numbers unchanged", () => {
+    expect(normalizeGermanPhone("12345")).toBe("12345");
+  });
+
+  it("handles empty input", () => {
+    expect(normalizeGermanPhone("")).toBe("");
+  });
+});
+
+describe("resolveCityAbbreviation", () => {
+  it("resolves SB to Saarbrücken", () => {
+    expect(resolveCityAbbreviation("SB")).toBe("Saarbrücken");
+  });
+
+  it("resolves SLS to Saarlouis", () => {
+    expect(resolveCityAbbreviation("SLS")).toBe("Saarlouis");
+  });
+
+  it("resolves HOM to Homburg", () => {
+    expect(resolveCityAbbreviation("HOM")).toBe("Homburg");
+  });
+
+  it("is case-insensitive", () => {
+    expect(resolveCityAbbreviation("hom")).toBe("Homburg");
+    expect(resolveCityAbbreviation("Sls")).toBe("Saarlouis");
+  });
+
+  it("returns unknown abbreviations unchanged", () => {
+    expect(resolveCityAbbreviation("München")).toBe("München");
+    expect(resolveCityAbbreviation("XYZ")).toBe("XYZ");
   });
 });

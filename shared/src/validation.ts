@@ -122,6 +122,7 @@ export const csvColumnMappingSchema = z.record(
       "notizen",
       "veroeffentlicht",
       "status",
+      "__freitext__",
     ])
     .nullable()
 );

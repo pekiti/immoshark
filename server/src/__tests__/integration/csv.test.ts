@@ -122,6 +122,30 @@ describe("CSV Import", () => {
     expect(body.error.code).toBe("SESSION_NOT_FOUND");
   });
 
+  it("POST /api/csv/import → accepts __freitext__ in mapping", async () => {
+    const csv = "Info\nWohnung in der Hauptstr. 10, 10115 Berlin";
+    const form = new FormData();
+    form.append("file", makeCsvBlob(csv), "test.csv");
+    const uploadRes = await fetch(`${baseUrl}/api/csv/upload`, { method: "POST", body: form });
+    const { data: uploadData } = await uploadRes.json();
+
+    // Import with __freitext__ mapping — will fail on LLM call (no API key in tests)
+    // but should not fail on mapping validation
+    const res = await fetch(`${baseUrl}/api/csv/import`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        session_id: uploadData.session_id,
+        mapping: { Info: "__freitext__" },
+      }),
+    });
+    // Should get 200 — import runs but rows may be skipped due to missing required fields
+    // (no LLM caller provided in test, so extraction returns empty objects)
+    expect(res.status).toBe(200);
+    const { data } = await res.json();
+    expect(data.skipped).toBe(1); // row skipped because no required fields extracted
+  });
+
   it("POST /api/csv/import → 400 for invalid mapping", async () => {
     // Upload first to get valid session
     const csv = "Col1\nVal1";

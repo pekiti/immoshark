@@ -3,7 +3,7 @@ import multer from "multer";
 import { csvColumnMappingSchema } from "@immoshark/shared";
 import { parseCsvContent, importCsvData } from "../services/csv.service.js";
 import { validate } from "../middleware/validate.js";
-import { suggestMapping } from "../services/mapping.service.js";
+import { suggestMapping, createOpenAICaller } from "../services/mapping.service.js";
 
 export const csvRouter = Router();
 
@@ -63,7 +63,7 @@ csvRouter.post("/suggest-mapping", async (req, res) => {
 });
 
 // POST /api/csv/import — import with column mapping
-csvRouter.post("/import", (req, res) => {
+csvRouter.post("/import", async (req, res) => {
   const { session_id, mapping } = req.body;
 
   if (!session_id || !csvStore.has(session_id)) {
@@ -82,7 +82,12 @@ csvRouter.post("/import", (req, res) => {
   }
 
   const content = csvStore.get(session_id)!;
-  const result = importCsvData(content, parsedMapping.data);
+
+  // Only create LLM caller if freitext columns exist
+  const hasFreitext = Object.values(parsedMapping.data).includes("__freitext__");
+  const callLLM = hasFreitext ? createOpenAICaller() : undefined;
+
+  const result = await importCsvData(content, parsedMapping.data, callLLM);
 
   csvStore.delete(session_id);
 

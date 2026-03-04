@@ -161,8 +161,10 @@ export interface CsvUploadResult {
   total_rows: number;
 }
 
+export type CsvColumnMappingValue = keyof ImmobilieCreateDTO | "__freitext__" | null;
+
 export interface CsvColumnMapping {
-  [csvHeader: string]: keyof ImmobilieCreateDTO | null;
+  [csvHeader: string]: CsvColumnMappingValue;
 }
 
 export interface CsvImportResult {

@@ -1,4 +1,4 @@
-import type { CsvColumnMapping } from "@immoshark/shared";
+import type { CsvColumnMapping, ImmobilieCreateDTO } from "@immoshark/shared";
 import { csvColumnMappingSchema } from "@immoshark/shared";
 
 /** Callable that sends a prompt to an LLM and returns the raw text response. */
@@ -91,4 +91,58 @@ export async function suggestMapping(
   if (!result.success) return null;
 
   return result.data;
+}
+
+const EXTRACTION_SYSTEM_PROMPT = `Du bist ein Daten-Extraktions-Assistent für eine Immobilienverwaltung.
+Deine Aufgabe: Aus Fließtexten strukturierte Immobiliendaten extrahieren.
+
+Die Zielfelder sind:
+${TARGET_FIELDS}
+
+Du erhältst ein JSON-Array mit Fließtexten. Für jeden Text extrahierst du so viele Felder wie möglich.
+Antworte mit einem JSON-Array gleicher Länge. Jedes Element ist ein Objekt mit den erkannten Feldern.
+Felder die nicht erkannt werden, weglassen (nicht null setzen).
+
+Regeln:
+- Preise in Euro als Zahl (z.B. 250000, nicht "250.000 €")
+- Flächen in m² als Zahl
+- PLZ als 5-stelliger String
+- Typ muss einer von: wohnung, haus, grundstueck, gewerbe sein
+- Status muss einer von: verfuegbar, reserviert, verkauft sein
+- Datum im Format JJJJ-MM-TT
+- Antworte NUR mit dem JSON-Array, kein weiterer Text.`;
+
+/**
+ * Extracts structured immobilie data from free-text strings using an LLM.
+ * Processes texts in batches to optimize cost/latency.
+ * Returns one partial DTO per input text. On LLM error, returns empty objects.
+ */
+export async function extractFromFreetext(
+  texts: string[],
+  callLLM: LLMCaller = createOpenAICaller(),
+  batchSize: number = 5,
+): Promise<Partial<ImmobilieCreateDTO>[]> {
+  const results: Partial<ImmobilieCreateDTO>[] = new Array(texts.length).fill({});
+
+  for (let i = 0; i < texts.length; i += batchSize) {
+    const batch = texts.slice(i, i + batchSize);
+    const userPrompt = JSON.stringify(batch);
+
+    try {
+      const raw = await callLLM(EXTRACTION_SYSTEM_PROMPT, userPrompt);
+      const parsed = JSON.parse(raw);
+
+      if (Array.isArray(parsed)) {
+        for (let j = 0; j < batch.length; j++) {
+          if (parsed[j] && typeof parsed[j] === "object") {
+            results[i + j] = parsed[j];
+          }
+        }
+      }
+    } catch {
+      // On error, leave empty objects for this batch
+    }
+  }
+
+  return results;
 }

@@ -29,6 +29,7 @@ const FIELD_OPTIONS: { value: string; label: string }[] = [
   { value: "notizen", label: "Notizen" },
   { value: "veroeffentlicht", label: "Veröffentlicht am" },
   { value: "status", label: "Status" },
+  { value: "__freitext__", label: "Freitext-Extraktion (KI)" },
 ];
 
 // Auto-map CSV headers to DB fields
